@@ -69,8 +69,8 @@ def choose_name(update: Update, context: CallbackContext) -> int:
         )
         return CHOOSE_NAME
 
-    transliterated.replace(" ", "_")
-    transliterated.replace("\n", "_")
+    transliterated = transliterated.replace(" ", "_")
+    transliterated = transliterated.replace("\n", "_")
     context.user_data["feedback_name"] = transliterated
 
     if FeedbackMethods.name_exists(SessionLocal(), transliterated) is True:
