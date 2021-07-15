@@ -114,9 +114,8 @@ def my_feedbacks(update: Update, context: CallbackContext):
     msg = update.callback_query.message
     data = update.callback_query.data
 
-    if context.user_data.get("feedback_scroll_ids") is None:
-        context.user_data["feedback_scroll_ids"] = [x.id for x in
-                                                    FeedbackMethods.get_welcomes(SessionLocal(), msg.chat_id)]
+    context.user_data["feedback_scroll_ids"] = [x.id for x in
+                                                FeedbackMethods.get_welcomes(SessionLocal(), msg.chat_id)]
 
     if context.user_data.get("current_feedback_scroll_id") is None:
         context.user_data["current_feedback_scroll_id"] = 0
