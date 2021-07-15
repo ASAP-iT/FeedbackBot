@@ -1,6 +1,7 @@
 from telegram import *
 from telegram.ext import *
 
+import code_generator
 from FeedbackMethods import FeedbackMethods
 import config
 import models
@@ -143,9 +144,13 @@ def my_feedbacks(update: Update, context: CallbackContext):
 
     markup = InlineKeyboardMarkup(kb)
 
+    bot_name = update.message.bot.username
+    code_url = f"codes/{welcome.name}.png"
+    code_generator.generate_qr_code(f"https://t.me/{bot_name}?start={welcome.name.lower()}", code_url)
+
     try:
         msg.edit_media(media=InputMediaPhoto(
-            media=open(welcome.code_url, 'rb'),
+            media=open(code_url, 'rb'),
             caption=welcome.message + f"\n\n{welcome_id}"
         ), reply_markup=markup)
     except:
