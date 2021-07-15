@@ -60,7 +60,6 @@ def create_feedback_back(update: Update, context: CallbackContext) -> int:
 
 def choose_name(update: Update, context: CallbackContext) -> int:
     txt = update.message.text
-    context.user_data["feedback_name"] = txt
 
     try:
         transliterated = transliterate.translit(txt, reversed=True)
@@ -70,7 +69,11 @@ def choose_name(update: Update, context: CallbackContext) -> int:
         )
         return CHOOSE_NAME
 
-    if FeedbackMethods.name_exists(SessionLocal(), txt.lower()) is True:
+    transliterated.replace(" ", "_")
+    transliterated.replace("\n", "_")
+    context.user_data["feedback_name"] = transliterated
+
+    if FeedbackMethods.name_exists(SessionLocal(), transliterated) is True:
         update.message.reply_text(
             "Такое есть уже лох"
         )
