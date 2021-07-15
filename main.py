@@ -139,7 +139,6 @@ def my_feedbacks(update: Update, context: CallbackContext):
 
     kb = [
         [InlineKeyboardButton("⬅️", callback_data="feedback_scroll_left"),
-         InlineKeyboardButton(f"{current_id}", callback_data="pizda"),
          InlineKeyboardButton("➡️️", callback_data="feedback_scroll_right")]
     ]
 
