@@ -121,7 +121,7 @@ def my_feedbacks(update: Update, context: CallbackContext):
     context.user_data["feedback_scroll_ids"] = [x.id for x in
                                                 FeedbackMethods.get_welcomes(SessionLocal(), msg.chat_id)]
 
-    if context.user_data["feedback_scroll_ids"]:
+    if len(context.user_data["feedback_scroll_ids"]) == 0:
         msg.reply_text("Пока опросом немае")
         return ConversationHandler.END
 
