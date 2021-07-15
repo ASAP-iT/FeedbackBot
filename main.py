@@ -144,7 +144,7 @@ def my_feedbacks(update: Update, context: CallbackContext):
 
     markup = InlineKeyboardMarkup(kb)
 
-    bot_name = update.message.bot.username
+    bot_name = update.callback_query.message.bot.username
     code_url = f"codes/{welcome.name}.png"
     code_generator.generate_qr_code(f"https://t.me/{bot_name}?start={welcome.name.lower()}", code_url)
 
