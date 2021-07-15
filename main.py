@@ -161,6 +161,7 @@ def my_feedbacks(update: Update, context: CallbackContext):
             caption=welcome.message + f"\n\n{welcome_id}"
         ), reply_markup=markup)
     except:
+        msg.delete()
         msg.reply_photo(open(welcome.code_url, 'rb'), caption=welcome.message + f"\n\n{welcome_id}",
                         reply_markup=markup)
 
