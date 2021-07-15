@@ -121,6 +121,10 @@ def my_feedbacks(update: Update, context: CallbackContext):
     context.user_data["feedback_scroll_ids"] = [x.id for x in
                                                 FeedbackMethods.get_welcomes(SessionLocal(), msg.chat_id)]
 
+    if context.user_data["feedback_scroll_ids"]:
+        msg.reply_text("Пока опросом немае")
+        return ConversationHandler.END
+
     if context.user_data.get("current_feedback_scroll_id") is None:
         context.user_data["current_feedback_scroll_id"] = 0
     else:
@@ -159,6 +163,8 @@ def my_feedbacks(update: Update, context: CallbackContext):
     except:
         msg.reply_photo(open(welcome.code_url, 'rb'), caption=welcome.message + f"\n\n{welcome_id}",
                         reply_markup=markup)
+
+    return ConversationHandler.END
 
 
 def main():
