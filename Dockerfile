@@ -1,14 +1,11 @@
 FROM python:3.9.5
 
-ARG PORT
+RUN mkdir -p /usr/src/asap_feedback
 
-RUN mkdir -p /usr/src/cherry
+WORKDIR /usr/src/asap_feedback
 
-WORKDIR /usr/src/cherry
-
-COPY ./requirements.txt /usr/src/cherry
+COPY ./requirements.txt /usr/src/asap_feedback
 RUN pip install --no-cache-dir -r requirements.txt
-COPY . /usr/src/cherry
-EXPOSE ${PORT}
+COPY . /usr/src/asap_feedback
 
-CMD uvicorn main:app --reload --port ${PORT} --host 0.0.0.0
+CMD python main.py
