@@ -35,6 +35,10 @@ class FeedbackMethods:
         return db.query(WelcomeMessage).filter(WelcomeMessage.name == feedback_name).first()
 
     @staticmethod
+    def get_welcome_by_id(db: Session, welcome_id: int) -> WelcomeMessage:
+        return db.query(WelcomeMessage).filter(WelcomeMessage.id == welcome_id).first()
+
+    @staticmethod
     def name_exists(db: Session, name: str) -> bool:
         return db.query(WelcomeMessage).filter(WelcomeMessage.name == name).first() is not None
 
@@ -234,3 +238,7 @@ class FeedbackMethods:
         user = User(user_id=user_id)
         db.add(user)
         db.commit()
+
+    @staticmethod
+    def get_welcomes(db: Session, chat_id: int) -> List[WelcomeMessage]:
+        return db.query(WelcomeMessage).filter(WelcomeMessage.chat_id == chat_id).all()

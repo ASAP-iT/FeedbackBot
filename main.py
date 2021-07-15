@@ -110,6 +110,51 @@ def create_welcome(update: Update, context: CallbackContext) -> int:
     return ConversationHandler.END
 
 
+def my_feedbacks(update: Update, context: CallbackContext):
+    msg = update.callback_query.message
+    data = update.callback_query.data
+
+    if context.user_data.get("feedback_scroll_ids") is None:
+        context.user_data["feedback_scroll_ids"] = [x.id for x in
+                                                    FeedbackMethods.get_welcomes(SessionLocal(), msg.chat_id)]
+
+    if context.user_data.get("current_feedback_scroll_id") is None:
+        context.user_data["current_feedback_scroll_id"] = 0
+    else:
+        if data == "feedback_scroll_left":
+            context.user_data["current_feedback_scroll_id"] -= 1
+            if context.user_data["current_feedback_scroll_id"] < 0:
+                context.user_data["current_feedback_scroll_id"] = len(context.user_data["feedback_scroll_ids"]) - 1
+        if data == "feedback_scroll_right":
+            context.user_data["current_feedback_scroll_id"] += 1
+            if len(context.user_data["feedback_scroll_ids"]) <= context.user_data["current_feedback_scroll_id"]:
+                context.user_data["current_feedback_scroll_id"] = 0
+
+    current_id = context.user_data["current_feedback_scroll_id"]
+    msg = update.callback_query.message
+
+    welcome_id = context.user_data["feedback_scroll_ids"][current_id]
+
+    welcome = FeedbackMethods.get_welcome_by_id(SessionLocal(), welcome_id)
+
+    kb = [
+        [InlineKeyboardButton("⬅️", callback_data="feedback_scroll_left"),
+         InlineKeyboardButton(f"{current_id}", callback_data="pizda"),
+         InlineKeyboardButton("➡️️", callback_data="feedback_scroll_right")]
+    ]
+
+    markup = InlineKeyboardMarkup(kb)
+
+    try:
+        msg.edit_media(media=InputMediaPhoto(
+            media=open(welcome.code_url, 'rb'),
+            caption=welcome.message + f"\n\n{welcome_id}"
+        ), reply_markup=markup)
+    except:
+        msg.reply_photo(open(welcome.code_url, 'rb'), caption=welcome.message + f"\n\n{welcome_id}",
+                        reply_markup=markup)
+
+
 def main():
     models.Base.metadata.create_all(bind=engine)
 
@@ -121,6 +166,8 @@ def main():
 
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CallbackQueryHandler(help, pattern=r'start_help'))
+    dp.add_handler(
+        CallbackQueryHandler(my_feedbacks, pattern=r'^(?:start_feedbacks|feedback_scroll_left|feedback_scroll_right)$'))
 
     create = ConversationHandler(
         entry_points=[CallbackQueryHandler(create_feedback, pattern=r'start_create')],
