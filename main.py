@@ -329,7 +329,7 @@ def my_history(update: Update, context: CallbackContext):
 
     markup = InlineKeyboardMarkup(kb)
 
-    text = feedback.message
+    text = f"{feedback.message} - {current_id}"
 
     try:
         msg.edit_text(text, reply_markup=markup)
