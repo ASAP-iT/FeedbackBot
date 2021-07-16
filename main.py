@@ -293,6 +293,53 @@ def reply_message(update: Update, context: CallbackContext):
     return ConversationHandler.END
 
 
+def my_history(update: Update, context: CallbackContext):
+    msg = update.callback_query.message
+    data = update.callback_query.data
+
+    context.user_data["history_scroll_ids"] = [x.id for x in
+                                                FeedbackMethods.get_feedbacks(SessionLocal(), msg.chat_id)]
+
+    if len(context.user_data["history_scroll_ids"]) == 0:
+        msg.reply_text("Пока опросом немае")
+        return ConversationHandler.END
+
+    if context.user_data.get("current_history_scroll_id") is None:
+        context.user_data["current_history_scroll_id"] = 0
+    else:
+        if data == "history_scroll_left":
+            context.user_data["current_history_scroll_id"] -= 1
+            if context.user_data["current_history_scroll_id"] < 0:
+                context.user_data["current_history_scroll_id"] = len(context.user_data["history_scroll_ids"]) - 1
+        if data == "history_scroll_right":
+            context.user_data["current_history_scroll_id"] += 1
+            if len(context.user_data["history_scroll_ids"]) <= context.user_data["current_history_scroll_id"]:
+                context.user_data["current_history_scroll_id"] = 0
+
+    current_id = context.user_data["current_history_scroll_id"]
+
+    feedback_id = context.user_data["history_scroll_ids"][current_id]
+
+    feedback = FeedbackMethods.get_feedback(SessionLocal(), feedback_id)
+
+    kb = [
+        [InlineKeyboardButton("⬅️", callback_data="history_scroll_left"),
+         InlineKeyboardButton("➡️️", callback_data="history_scroll_right")]
+    ]
+
+    markup = InlineKeyboardMarkup(kb)
+
+    text = feedback.message
+
+    try:
+        msg.edit_text(text, reply_markup=markup)
+    except:
+        msg.delete()
+        msg.reply_text(text, reply_markup=markup)
+
+    return ConversationHandler.END
+
+
 def main():
     models.Base.metadata.create_all(bind=engine)
 
@@ -325,7 +372,12 @@ def main():
     dp.add_handler(reply)
 
     dp.add_handler(
-        CallbackQueryHandler(my_feedbacks, pattern=r'^(?:start_feedbacks|feedback_scroll_left|feedback_scroll_right)$'))
+        CallbackQueryHandler(my_feedbacks, pattern=r'^(?:start_feedbacks|feedback_scroll_left|feedback_scroll_right)$')
+    )
+
+    dp.add_handler(
+        CallbackQueryHandler(my_history, pattern=r'^(?:start_history|history_scroll_left|history_scroll_right)$')
+    )
 
     create = ConversationHandler(
         entry_points=[CallbackQueryHandler(create_feedback, pattern=r'start_create')],

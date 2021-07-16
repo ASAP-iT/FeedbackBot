@@ -242,3 +242,7 @@ class FeedbackMethods:
     @staticmethod
     def get_welcomes(db: Session, chat_id: int) -> List[WelcomeMessage]:
         return db.query(WelcomeMessage).filter(WelcomeMessage.chat_id == chat_id).all()
+
+    @staticmethod
+    def get_feedbacks(db: Session, chat_id: int) -> List[FeedbackMessage]:
+        return db.query(FeedbackMessage).filter(FeedbackMessage.from_user_id == chat_id).all()
