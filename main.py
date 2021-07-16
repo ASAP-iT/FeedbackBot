@@ -8,11 +8,38 @@ import models
 from database import engine, SessionLocal
 import transliterate
 
+SELECT_TYPE, FEEDBACK, WANTS_REPLY = range(3)
 CHOOSE_NAME, CREATE_WELCOME = range(2)
+REPLY_TO_FEEDBACK = 0
 
 
 def start(update: Update, context: CallbackContext) -> int:
+    msg = update.message
     FeedbackMethods.create_user(SessionLocal(), update.message.from_user.id)
+    context.user_data["user_id"] = msg.from_user.id
+
+    if context.args is not None:
+        if len(context.args) > 0:
+            context.user_data["welcome_name"] = context.args[0]
+            welcome_name = context.user_data["welcome_name"]
+
+            welcome = FeedbackMethods.get_welcome(SessionLocal(), welcome_name)
+
+            keyboard = [
+                [InlineKeyboardButton("хуй", callback_data="complain")],
+                [InlineKeyboardButton("pizda", callback_data="suggest")],
+                [InlineKeyboardButton("asdf", callback_data="praise")],
+                [InlineKeyboardButton("fdsa", callback_data="else")]
+            ]
+
+            markup = InlineKeyboardMarkup(keyboard)
+
+            context.user_data["welcome_id"] = welcome.id
+            context.user_data["welcome_name"] = welcome.name
+
+            update.message.reply_text(f"{welcome.name}\n\n{welcome.message}", reply_markup=markup)
+
+            return SELECT_TYPE
 
     kb = [
         [InlineKeyboardButton("🙋 Помощь", callback_data="start_help")],
@@ -25,7 +52,7 @@ def start(update: Update, context: CallbackContext) -> int:
 
     markup = InlineKeyboardMarkup(kb)
 
-    update.message.reply_text("Привет!", reply_markup=markup)
+    msg.reply_text("Привет!", reply_markup=markup)
 
     return ConversationHandler.END
 
@@ -154,16 +181,114 @@ def my_feedbacks(update: Update, context: CallbackContext):
     bot_name = update.callback_query.message.bot.username
     code_url = f"codes/{welcome.name}.png"
     code_generator.generate_qr_code(f"https://t.me/{bot_name}?start={welcome.name.lower()}", code_url)
+    caption = welcome.message + f"\n\n{welcome_id}" + f"\n\n{f'https://t.me/{msg.bot.username}?start={welcome.name}'}"
 
     try:
         msg.edit_media(media=InputMediaPhoto(
             media=open(code_url, 'rb'),
-            caption=welcome.message + f"\n\n{welcome_id}"
+            caption=caption
         ), reply_markup=markup)
     except:
         msg.delete()
-        msg.reply_photo(open(welcome.code_url, 'rb'), caption=welcome.message + f"\n\n{welcome_id}",
+        msg.reply_photo(open(welcome.code_url, 'rb'), caption=caption,
                         reply_markup=markup)
+
+    return ConversationHandler.END
+
+
+def select_type(update: Update, context: CallbackContext):
+    msg = update.callback_query.message
+    type = update.callback_query.data
+
+    if type == "complain":
+        msg.edit_text("STR_REPLY_COMPLAIN")
+    elif type == "praise":
+        msg.edit_text("STR_REPLY_COMPLAIN")
+    elif type == "suggest":
+        msg.edit_text("STR_REPLY_COMPLAIN")
+    elif type == "else":
+        msg.edit_text("STR_REPLY_COMPLAIN")
+    else:
+        msg.edit_text("STR_REPLY_COMPLAIN")
+        return ConversationHandler.END
+
+    return FEEDBACK
+
+
+def feedback_msg(update: Update, context: CallbackContext):
+    context.user_data["user_msg"] = update.message.text
+    context.user_data["feedback_msg_id"] = update.message.message_id
+
+    if len(update.message.photo) > 0:
+        context.user_data["user_image"] = update.message.photo
+        context.user_data["user_msg"] = update.message.caption
+
+    keyboard = [
+        [InlineKeyboardButton("Да", callback_data="yes"), InlineKeyboardButton("Нет", callback_data="no")],
+        [InlineKeyboardButton("⬅️ Назад", callback_data='prev_menu')]
+    ]
+
+    markup = InlineKeyboardMarkup(keyboard)
+
+    update.message.reply_text("чо-то типа", reply_markup=markup)
+
+    return WANTS_REPLY
+
+
+def wants_reply(update: Update, context: CallbackContext):
+    data = update.callback_query.data
+    msg = update.callback_query.message
+
+    if data == "prev_menu":
+        return select_type(update, context)
+
+    if data == "yes":
+        msg.edit_text("STR_FORWARD_MESSAGE")
+    else:
+        msg.edit_text("STR_THANKS_FOR_FEEDBACK")
+
+    context.user_data["reply_type"] = data
+
+    fb_msg = FeedbackMethods.create_feedback(
+        SessionLocal(),
+        welcome_id=context.user_data["welcome_id"],
+        from_user_id=context.user_data["user_id"],
+        message=context.user_data["user_msg"],
+        msg_type=context.user_data["reply_type"],
+        msg_id=context.user_data["feedback_msg_id"]
+    )
+
+    admin_id = fb_msg.welcome_message.chat_id
+
+    kb = [
+        [InlineKeyboardButton("Хуй пизда отзыв ответить",
+                              callback_data=f"reply_to_feedback-{fb_msg.id}")]
+    ]
+
+    markup = InlineKeyboardMarkup(kb)
+
+    msg.bot.send_message(admin_id, "пиздец отзыв оставили", reply_markup=markup)
+
+    return ConversationHandler.END
+
+
+def reply_feedback(update: Update, context: CallbackContext):
+    update.callback_query.message.reply_text("Ответьте на хуй:")
+    context.user_data["current_reply_msg_id"] = update.callback_query.message.message_id
+    context.user_data["current_reply_feedback_id"] = int(update.callback_query.data.split("-")[1])
+
+    return REPLY_TO_FEEDBACK
+
+
+def reply_message(update: Update, context: CallbackContext):
+    msg = update.message.text
+
+    update.message.bot.delete_message(chat_id=update.message.chat_id,
+                                      message_id=context.user_data["current_reply_msg_id"])
+
+    feedback = FeedbackMethods.get_feedback(SessionLocal(), context.user_data["current_reply_feedback_id"])
+
+    update.message.bot.send_message(feedback.from_user_id, f"вам посылка\n{msg}")
 
     return ConversationHandler.END
 
@@ -177,8 +302,28 @@ def main():
     updater = Updater(config.TOKEN, use_context=True)
     dp = updater.dispatcher
 
-    dp.add_handler(CommandHandler("start", start))
+    feedback = ConversationHandler(
+        entry_points=[CommandHandler("start", start)],
+        states={
+            SELECT_TYPE: [CallbackQueryHandler(select_type, pattern=r'^(?:complain|suggest|praise|else)$')],
+            FEEDBACK: [
+                MessageHandler((Filters.text | (Filters.caption & Filters.photo)) & ~Filters.command, feedback_msg)],
+            WANTS_REPLY: [CallbackQueryHandler(wants_reply, pattern=r'^(?:yes|no|prev_menu)$')]
+        },
+        fallbacks=[CommandHandler("cancel", cancel)]
+    )
+
     dp.add_handler(CallbackQueryHandler(help, pattern=r'start_help'))
+
+    reply = ConversationHandler(
+        entry_points=[CallbackQueryHandler(reply_feedback, pattern=r'reply_to_feedback-*')],
+        states={
+            REPLY_TO_FEEDBACK: [MessageHandler(Filters.text & ~Filters.command, reply_message)]
+        },
+        fallbacks=[CommandHandler("cancel", cancel)]
+    )
+    dp.add_handler(reply)
+
     dp.add_handler(
         CallbackQueryHandler(my_feedbacks, pattern=r'^(?:start_feedbacks|feedback_scroll_left|feedback_scroll_right)$'))
 
@@ -194,6 +339,7 @@ def main():
     )
 
     dp.add_handler(create)
+    dp.add_handler(feedback)
 
     updater.start_polling()
     updater.idle()
