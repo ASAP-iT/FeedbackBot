@@ -310,7 +310,7 @@ def main():
                 MessageHandler((Filters.text | (Filters.caption & Filters.photo)) & ~Filters.command, feedback_msg)],
             WANTS_REPLY: [CallbackQueryHandler(wants_reply, pattern=r'^(?:yes|no|prev_menu)$')]
         },
-        fallbacks=[CommandHandler("cancel", cancel)]
+        fallbacks=[CommandHandler("cancel", cancel), CommandHandler("start", start)]
     )
 
     dp.add_handler(CallbackQueryHandler(help, pattern=r'start_help'))
@@ -320,7 +320,7 @@ def main():
         states={
             REPLY_TO_FEEDBACK: [MessageHandler(Filters.text & ~Filters.command, reply_message)]
         },
-        fallbacks=[CommandHandler("cancel", cancel)]
+        fallbacks=[CommandHandler("cancel", cancel), CommandHandler("start", start)]
     )
     dp.add_handler(reply)
 
@@ -334,7 +334,7 @@ def main():
             CREATE_WELCOME: [MessageHandler(Filters.text & ~Filters.command, create_welcome),
                              CallbackQueryHandler(create_feedback_back, pattern=r'create_back')],
         },
-        fallbacks=[CommandHandler("cancel", cancel)],
+        fallbacks=[CommandHandler("cancel", cancel), CommandHandler("start", start)],
         per_chat=True
     )
 
