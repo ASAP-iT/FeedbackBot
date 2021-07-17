@@ -66,18 +66,23 @@ def start(update: Update, context: CallbackContext) -> int:
 
 
 def help(update: Update, context: CallbackContext) -> int:
-    if update.message is not None:
+    print("help")
+    if update.message is None:
         msg = update.callback_query.message
+        print("callback")
     else:
-        msg = update.callback_query.message
+        msg = update.message
+        print("command")
 
     is_admin = FeedbackMethods.is_admin(SessionLocal(), msg.chat.id)
     if is_admin:
         new_text = STR_ADMIN_HELP
     else:
         new_text = STR_USER_HELP
-
-    msg.edit_text(new_text, reply_markup=InlineKeyboardMarkup([]), parse_mode="HTML")
+    try:
+        msg.edit_text(new_text, reply_markup=InlineKeyboardMarkup([]), parse_mode="HTML")
+    except:
+        msg.reply_text(new_text, parse_mode="HTML")
     return ConversationHandler.END
 
 
@@ -548,7 +553,7 @@ def main():
     )
 
     dp.add_handler(CallbackQueryHandler(help, pattern=r"start_help"))
-    dp.add_handler(CommandHandler("start_help", help))
+    dp.add_handler(CommandHandler("help", help))
 
     reply = ConversationHandler(
         entry_points=[
