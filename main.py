@@ -53,7 +53,7 @@ def start(update: Update, context: CallbackContext) -> int:
 
     markup = InlineKeyboardMarkup(kb)
 
-    msg.reply_text("Привет!", reply_markup=markup)
+    msg.reply_text("Привет иди нахуй это дев!", reply_markup=markup)
 
     return ConversationHandler.END
 
