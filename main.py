@@ -354,6 +354,8 @@ def main():
     else:
         token = config.TOKEN
 
+    print(token, args)
+
     updater = Updater(token, use_context=True)
     dp = updater.dispatcher
 
