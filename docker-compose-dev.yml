@@ -10,4 +10,4 @@ services:
 
 networks:
   default:
-    name: feedbackbot-dev
+    name: feedbackbotdev
