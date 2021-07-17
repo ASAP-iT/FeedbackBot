@@ -246,3 +246,17 @@ class FeedbackMethods:
     @staticmethod
     def get_feedbacks(db: Session, chat_id: int) -> List[FeedbackMessage]:
         return db.query(FeedbackMessage).filter(FeedbackMessage.from_user_id == chat_id).all()
+
+    @staticmethod
+    def edit_welcome_title(db: Session, welcome_id: int, title: str):
+        welcome = db.query(WelcomeMessage).filter(WelcomeMessage.id == welcome_id).first()
+        if welcome is not None:
+            welcome.name = title
+            db.commit()
+
+    @staticmethod
+    def edit_welcome_description(db: Session, welcome_id: int, description: str):
+        welcome = db.query(WelcomeMessage).filter(WelcomeMessage.id == welcome_id).first()
+        if welcome is not None:
+            welcome.message = description
+            db.commit()
