@@ -74,7 +74,7 @@ def help(update: Update, context: CallbackContext) -> int:
     else:
         new_text = STR_USER_HELP
 
-    msg.edit_text(new_text, reply_markup=InlineKeyboardMarkup([]))
+    msg.edit_text(new_text, reply_markup=InlineKeyboardMarkup([]), parse_mode="HTML")
     return ConversationHandler.END
 
 
