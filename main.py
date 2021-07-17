@@ -174,6 +174,7 @@ def my_feedbacks(update: Update, context: CallbackContext):
 
     kb = [
         [InlineKeyboardButton("⬅️", callback_data="feedback_scroll_left"),
+         InlineKeyboardButton("Edit", callback_data=f"welcome_edit-{welcome_id}"),
          InlineKeyboardButton("➡️️", callback_data="feedback_scroll_right")]
     ]
 
@@ -182,7 +183,7 @@ def my_feedbacks(update: Update, context: CallbackContext):
     bot_name = update.callback_query.message.bot.username
     code_url = f"codes/{welcome.name}.png"
     code_generator.generate_qr_code(f"https://t.me/{bot_name}?start={welcome.name.lower()}", code_url)
-    caption = welcome.message + f"\n\n{welcome_id}" + f"\n\n{f'https://t.me/{msg.bot.username}?start={welcome.name}'}"
+    caption = welcome.name + "\n" + welcome.message + f"\n\n{welcome_id}" + f"\n\n{f'https://t.me/{msg.bot.username}?start={welcome.name}'}"
 
     try:
         msg.edit_media(media=InputMediaPhoto(
@@ -299,7 +300,7 @@ def my_history(update: Update, context: CallbackContext):
     data = update.callback_query.data
 
     context.user_data["history_scroll_ids"] = [x.id for x in
-                                                FeedbackMethods.get_feedbacks(SessionLocal(), msg.chat_id)]
+                                               FeedbackMethods.get_feedbacks(SessionLocal(), msg.chat_id)]
 
     if len(context.user_data["history_scroll_ids"]) == 0:
         msg.reply_text("Пока опросом немае")
@@ -341,6 +342,78 @@ def my_history(update: Update, context: CallbackContext):
     return ConversationHandler.END
 
 
+def welcome_edit(update: Update, context: CallbackContext):
+    msg = update.callback_query.message
+    msg.delete()
+
+    welcome_id = int(update.callback_query.data.split("-")[1])
+
+    kb = [
+        [InlineKeyboardButton("edit title (you will need to edit qr codes)",
+                              callback_data=f"edit_welcome_title-{welcome_id}")],
+        [InlineKeyboardButton("edit description",
+                              callback_data=f"edit_welcome_description-{welcome_id}")],
+        [InlineKeyboardButton("<- back",
+                              callback_data=f"edit_welcome_back")],
+    ]
+
+    markup = InlineKeyboardMarkup(kb)
+
+    msg.reply_text("чо редачить", reply_markup=markup)
+
+    context.user_data["current_edit_id"] = welcome_id
+
+    return ConversationHandler.END
+
+
+def edit_welcome_back(update: Update, context: CallbackContext):
+    my_feedbacks(update, context)
+
+    return ConversationHandler.END
+
+
+def welcome_edit_desc(update: Update, context: CallbackContext):
+    msg = update.callback_query.message
+
+    markup = InlineKeyboardMarkup([
+        [InlineKeyboardButton("back", callback_data="edit_welcome_back")]
+    ])
+
+    msg.edit_text("новый дескришн:", reply_markup=markup)
+
+    return 0
+
+
+def welcome_edit_title(update: Update, context: CallbackContext):
+    msg = update.callback_query.message
+
+    markup = InlineKeyboardMarkup([
+        [InlineKeyboardButton("back", callback_data="edit_welcome_back")]
+    ])
+
+    msg.edit_text("новый тайтл:", reply_markup=markup)
+
+    return 0
+
+
+def new_title(update: Update, context: CallbackContext):
+    new_t = update.message.text
+
+    FeedbackMethods.edit_welcome_title(SessionLocal(), context.user_data["current_edit_id"], new_t)
+    update.message.reply_text("тайтл изменен!")
+
+    return ConversationHandler.END
+
+
+def new_description(update: Update, context: CallbackContext):
+    new_d = update.message.text
+
+    FeedbackMethods.edit_welcome_description(SessionLocal(), context.user_data["current_edit_id"], new_d)
+    update.message.reply_text("дескрипшн изменен!")
+
+    return ConversationHandler.END
+
+
 def main():
     models.Base.metadata.create_all(bind=engine)
 
@@ -368,7 +441,8 @@ def main():
                 MessageHandler((Filters.text | (Filters.caption & Filters.photo)) & ~Filters.command, feedback_msg)],
             WANTS_REPLY: [CallbackQueryHandler(wants_reply, pattern=r'^(?:yes|no|prev_menu)$')]
         },
-        fallbacks=[CommandHandler("cancel", cancel), CommandHandler("start", start)]
+        fallbacks=[CommandHandler("cancel", cancel), CommandHandler("start", start)],
+        per_chat=True
     )
 
     dp.add_handler(CallbackQueryHandler(help, pattern=r'start_help'))
@@ -378,7 +452,8 @@ def main():
         states={
             REPLY_TO_FEEDBACK: [MessageHandler(Filters.text & ~Filters.command, reply_message)]
         },
-        fallbacks=[CommandHandler("cancel", cancel), CommandHandler("start", start)]
+        fallbacks=[CommandHandler("cancel", cancel), CommandHandler("start", start)],
+        per_chat=True
     )
     dp.add_handler(reply)
 
@@ -388,6 +463,36 @@ def main():
 
     dp.add_handler(
         CallbackQueryHandler(my_history, pattern=r'^(?:start_history|history_scroll_left|history_scroll_right)$')
+    )
+
+    dp.add_handler(
+        CallbackQueryHandler(welcome_edit, pattern=r'welcome_edit-*')
+    )
+
+    dp.add_handler(CallbackQueryHandler(edit_welcome_back, pattern=r'edit_welcome_back'))
+
+    dp.add_handler(
+        ConversationHandler(
+            entry_points=[CallbackQueryHandler(welcome_edit_title, pattern=r'edit_welcome_title-*')],
+            states={
+                0: [MessageHandler(Filters.text & ~Filters.command, new_title),
+                    CallbackQueryHandler(edit_welcome_back, pattern=r'edit_welcome_back')]
+            },
+            fallbacks=[CommandHandler("cancel", cancel), CommandHandler("start", start)],
+            per_chat=True
+        )
+    )
+
+    dp.add_handler(
+        ConversationHandler(
+            entry_points=[CallbackQueryHandler(welcome_edit_desc, pattern=r'edit_welcome_description-*')],
+            states={
+                0: [MessageHandler(Filters.text & ~Filters.command, new_description),
+                    CallbackQueryHandler(edit_welcome_back, pattern=r'edit_welcome_back')]
+            },
+            fallbacks=[CommandHandler("cancel", cancel), CommandHandler("start", start)],
+            per_chat=True
+        )
     )
 
     create = ConversationHandler(
