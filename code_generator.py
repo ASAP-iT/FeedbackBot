@@ -3,7 +3,6 @@
 # Created by romanesin on 16.07.2021
 import qrcode
 
-print("test1234")
 
 def generate_qr_code(data: str, img_name: str):
     qr = qrcode.QRCode(version=1,
