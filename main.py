@@ -9,15 +9,34 @@ from texts import *
 from database import engine, SessionLocal
 import transliterate
 import sys
+from datetime import datetime, timedelta
 
 SELECT_TYPE, FEEDBACK, WANTS_REPLY = range(3)
 CHOOSE_NAME, CREATE_WELCOME = range(2)
 REPLY_TO_FEEDBACK = 0
 
 
+def send_notifications(context: CallbackContext):
+    chat_id = context.job.context
+    context.bot.send_message(chat_id, "pizda")
+
+
 def start(update: Update, context: CallbackContext) -> int:
     msg = update.message
     FeedbackMethods.create_user(SessionLocal(), update.message.from_user.id)
+
+    jobs = context.job_queue.get_jobs_by_name("notification")[1:]
+    print(jobs)
+    for job in jobs:
+        job.schedule_removal()
+
+    context.job_queue.run_repeating(
+        send_notifications,
+        interval=timedelta(seconds=5),
+        context=msg.chat_id,
+        first=datetime.now() + timedelta(seconds=2),
+        name="notification",
+    )
     context.user_data["user_id"] = msg.from_user.id
 
     if context.args is not None:
