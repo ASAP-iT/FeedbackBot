@@ -26,6 +26,15 @@ def start(update: Update, context: CallbackContext) -> int:
 
             welcome = FeedbackMethods.get_welcome(SessionLocal(), welcome_name)
 
+            if welcome is None:
+                if FeedbackMethods.delete_token(SessionLocal(), welcome_name) is None:
+                    msg.reply_markdown_v2("naebat hotel?")
+                    return ConversationHandler.END
+                else:
+                    FeedbackMethods.create_admin(SessionLocal(), msg.chat_id)
+                    msg.reply_markdown_v2("pizda vi admin")
+                    return ConversationHandler.END
+
             keyboard = [
                 [InlineKeyboardButton("хуй", callback_data="complain")],
                 [InlineKeyboardButton("pizda", callback_data="suggest")],
@@ -50,6 +59,7 @@ def start(update: Update, context: CallbackContext) -> int:
     if FeedbackMethods.is_admin(SessionLocal(), update.message.chat_id):
         kb.append([InlineKeyboardButton("✉️ Создать опрос", callback_data="start_create")])
         kb.append([InlineKeyboardButton("📩 Мои опросы", callback_data="start_feedbacks")])
+        kb.append([InlineKeyboardButton("!Дать админку другому челу!", callback_data="start_grand_admin")])
 
     markup = InlineKeyboardMarkup(kb)
 
@@ -426,11 +436,20 @@ def new_description(update: Update, context: CallbackContext):
 
 
 def send_to_admins(bot, txt: str, parse_mode=None, **kwargs):
-    try:
-        for admin_id in config.admins:
+    for admin_id in config.admins:
+        try:
             bot.sendMessage(text=txt, chat_id=admin_id, parse_mode=parse_mode)
-    except Exception as err:
-        print(err)
+        except Exception as err:
+            print(err)
+
+
+def grant_admin(update: Update, context: CallbackContext):
+    msg = update.callback_query.message
+
+    is_admin = FeedbackMethods.is_admin(SessionLocal(), msg.chat_id)
+    if is_admin:
+        token = FeedbackMethods.create_token(SessionLocal())
+        msg.reply_text(f"ваш токн: https://t.me/{msg.bot.username}?start={token}")
 
 
 # pls, do not delete stuff below
@@ -456,6 +475,8 @@ def main():
     send_to_admins(updater.bot, "Прогреваю код\n\n\nВылетаю разносить ебла пользователей")
 
     dp = updater.dispatcher
+
+    dp.add_handler(CallbackQueryHandler(grant_admin, pattern=r'start_grand_admin'))
 
     feedback = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
