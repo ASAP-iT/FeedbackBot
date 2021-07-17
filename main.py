@@ -426,11 +426,11 @@ def new_description(update: Update, context: CallbackContext):
 
 
 def send_to_admins(bot, txt: str, parse_mode=None, **kwargs):
-    try:
-        for admin_id in config.admins:
+    for admin_id in config.admins:
+        try:
             bot.sendMessage(text=txt, chat_id=admin_id, parse_mode=parse_mode)
-    except Exception as err:
-        print(err)
+        except Exception as err:
+            print(err)
 
 
 # pls, do not delete stuff below
