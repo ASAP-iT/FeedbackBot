@@ -174,6 +174,7 @@ def my_feedbacks(update: Update, context: CallbackContext):
 
     kb = [
         [InlineKeyboardButton("⬅️", callback_data="feedback_scroll_left"),
+         InlineKeyboardButton("Edit", callback_data=f"welcome_edit-{welcome_id}"),
          InlineKeyboardButton("➡️️", callback_data="feedback_scroll_right")]
     ]
 
@@ -299,7 +300,7 @@ def my_history(update: Update, context: CallbackContext):
     data = update.callback_query.data
 
     context.user_data["history_scroll_ids"] = [x.id for x in
-                                                FeedbackMethods.get_feedbacks(SessionLocal(), msg.chat_id)]
+                                               FeedbackMethods.get_feedbacks(SessionLocal(), msg.chat_id)]
 
     if len(context.user_data["history_scroll_ids"]) == 0:
         msg.reply_text("Пока опросом немае")
@@ -338,6 +339,25 @@ def my_history(update: Update, context: CallbackContext):
         msg.delete()
         msg.reply_text(text, reply_markup=markup)
 
+    return ConversationHandler.END
+
+
+def welcome_edit(update: Update, context: CallbackContext):
+    msg = update.callback_query.message
+    msg.delete()
+
+    welcome_id = int(update.callback_query.data.split("-")[1])
+
+    kb = [
+        [InlineKeyboardButton("edit title (you will need to edit qr codes)",
+                              callback_data=f"welcome_edit_title-{welcome_id}")],
+        [InlineKeyboardButton("edit description",
+                              callback_data=f"welcome_edit_description-{welcome_id}")],
+    ]
+
+    markup = InlineKeyboardMarkup(kb)
+
+    msg.reply_text("чо редачить", reply_markup=markup)
     return ConversationHandler.END
 
 
@@ -388,6 +408,10 @@ def main():
 
     dp.add_handler(
         CallbackQueryHandler(my_history, pattern=r'^(?:start_history|history_scroll_left|history_scroll_right)$')
+    )
+
+    dp.add_handler(
+        CallbackQueryHandler(welcome_edit, pattern=r'welcome_edit-*')
     )
 
     create = ConversationHandler(
