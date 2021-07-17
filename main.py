@@ -399,7 +399,18 @@ def welcome_edit_title(update: Update, context: CallbackContext):
 def new_title(update: Update, context: CallbackContext):
     new_t = update.message.text
 
-    FeedbackMethods.edit_welcome_title(SessionLocal(), context.user_data["current_edit_id"], new_t)
+    try:
+        transliterated = transliterate.translit(new_t, reversed=True)
+    except Exception:
+        update.message.reply_text(
+            "писать что ли не умеешь"
+        )
+        return 0
+
+    transliterated = transliterated.replace(" ", "_")
+    transliterated = transliterated.replace("\n", "_")
+
+    FeedbackMethods.edit_welcome_title(SessionLocal(), context.user_data["current_edit_id"], transliterated)
     update.message.reply_text("тайтл изменен!")
 
     return ConversationHandler.END
