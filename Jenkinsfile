@@ -23,10 +23,8 @@ pipeline {
                 echo "Deployed!"
             }
         }
-    }
 
-    stages {
-        stage("Deploy Prod") {
+        stage("Deploy Dev") {
             when {
                 branch "dev"
             }
