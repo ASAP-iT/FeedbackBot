@@ -55,16 +55,18 @@ def start(update: Update, context: CallbackContext) -> int:
             return SELECT_TYPE
 
     kb = [
-        [InlineKeyboardButton("🙋 Помощь", callback_data="start_help")],
-        [InlineKeyboardButton("💬 Мои ответы", callback_data="start_history")],
+        [
+            InlineKeyboardButton("🙋 Помощь", callback_data="start_help"),
+            InlineKeyboardButton("💬 Мои ответы", callback_data="start_history"),
+        ],
     ]
 
     if FeedbackMethods.is_admin(SessionLocal(), update.message.chat_id):
         kb.append(
-            [InlineKeyboardButton("✉️ Создать опрос", callback_data="start_create")]
-        )
-        kb.append(
-            [InlineKeyboardButton("📩 Мои опросы", callback_data="start_feedbacks")]
+            [
+                InlineKeyboardButton("✉️ Создать опрос", callback_data="start_create"),
+                InlineKeyboardButton("📩 Мои опросы", callback_data="start_feedbacks"),
+            ]
         )
         kb.append(
             [
@@ -222,7 +224,12 @@ def my_feedbacks(update: Update, context: CallbackContext):
             InlineKeyboardButton("⬅️", callback_data="feedback_scroll_left"),
             InlineKeyboardButton("Edit", callback_data=f"welcome_edit-{welcome_id}"),
             InlineKeyboardButton("➡️️", callback_data="feedback_scroll_right"),
-        ]
+        ],
+        [
+            InlineKeyboardButton(
+                "УДОЛИТЬ", callback_data=f"edit_welcome_delete-{welcome_id}"
+            )
+        ],
     ]
 
     markup = InlineKeyboardMarkup(kb)
@@ -528,6 +535,36 @@ def grant_admin(update: Update, context: CallbackContext):
         msg.reply_text(f"ваш токн: https://t.me/{msg.bot.username}?start={token}")
 
 
+def delete_welcome_ask(update: Update, context: CallbackContext):
+    msg = update.callback_query.message
+
+    welcome_id = int(update.callback_query.data.split("-")[1])
+    context.user_data["current_edit_id"] = welcome_id
+
+    markup = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("No", callback_data="no"),
+                InlineKeyboardButton("Yes", callback_data="yes"),
+            ],
+            # [InlineKeyboardButton("back", callback_data="edit_welcome_back")]
+        ]
+    )
+    msg.delete()
+    msg.reply_text("Уверен?", reply_markup=markup)
+
+    return 0
+
+
+def delete_welcome(update: Update, context: CallbackContext):
+    msg = update.callback_query.message
+
+    FeedbackMethods.delete_welcome(SessionLocal(), context.user_data["current_edit_id"])
+
+    msg.edit_text("УДОЛЕНО")
+    return ConversationHandler.END
+
+
 # pls, do not delete stuff below
 # noinspection PyTypeChecker
 def main():
@@ -652,6 +689,30 @@ def main():
                     MessageHandler(Filters.text & ~Filters.command, new_description),
                     CallbackQueryHandler(
                         edit_welcome_back, pattern=r"edit_welcome_back"
+                    ),
+                ]
+            },
+            fallbacks=[
+                CommandHandler("cancel", cancel),
+                CommandHandler("start", start),
+            ],
+            per_chat=True,
+        )
+    )
+
+    # no
+    dp.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CallbackQueryHandler(
+                    delete_welcome_ask, pattern=r"edit_welcome_delete-*"
+                )
+            ],
+            states={
+                0: [
+                    CallbackQueryHandler(delete_welcome, pattern=r"yes"),
+                    CallbackQueryHandler(
+                        edit_welcome_back, pattern=r"^(?:no|edit_welcome_back)$"
                     ),
                 ]
             },

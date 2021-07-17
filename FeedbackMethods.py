@@ -264,3 +264,10 @@ class FeedbackMethods:
         if welcome is not None:
             welcome.message = description
             db.commit()
+
+    @staticmethod
+    def delete_welcome(db: Session, welcome_id: int):
+        welcome = db.query(WelcomeMessage).filter(WelcomeMessage.id == welcome_id).first()
+
+        db.delete(welcome)
+        db.commit()
