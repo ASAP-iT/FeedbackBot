@@ -32,12 +32,12 @@ pipeline {
             steps {
                 echo "Deploying and Building..."
                 notifyEvents message: "#Feedback_Bot 🛠 Building New Container...", token: '7yi9o1VBd3mz-JP2JhQOICo3Y5zgPHGk'
-                sh "docker-compose build -f docker-compose-dev.yml"
+                sh "docker-compose -f docker-compose-dev.yml build"
                 notifyEvents message: "#Feedback_Bot ⛔️️ Stopping Previous Container...", token: '7yi9o1VBd3mz-JP2JhQOICo3Y5zgPHGk'
                 echo "Stopping previous container..."
-                sh "docker-compose down -f docker-compose-dev.yml"
+                sh "docker-compose -f docker-compose-dev.yml down"
                 notifyEvents message: "#Feedback_Bot 🐳 Upping New Container...", token: '7yi9o1VBd3mz-JP2JhQOICo3Y5zgPHGk'
-                sh "docker-compose up -d -f docker-compose-dev.yml"
+                sh "docker-compose -f docker-compose-dev.yml up -d"
                 echo "Deployed!"
             }
         }
