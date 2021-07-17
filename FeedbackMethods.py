@@ -249,9 +249,10 @@ class FeedbackMethods:
 
     @staticmethod
     def edit_welcome_title(db: Session, welcome_id: int, title: str):
-        welcome = db.query(WelcomeMessage).filter(WelcomeMessage.id == welcome_id).first()
+        welcome: WelcomeMessage = db.query(WelcomeMessage).filter(WelcomeMessage.id == welcome_id).first()
         if welcome is not None:
             welcome.name = title
+            welcome.code_url = f"codes/{welcome.name}.png"
             db.commit()
 
     @staticmethod
