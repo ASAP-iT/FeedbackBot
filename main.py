@@ -60,9 +60,19 @@ def start(update: Update, context: CallbackContext) -> int:
     ]
 
     if FeedbackMethods.is_admin(SessionLocal(), update.message.chat_id):
-        kb.append([InlineKeyboardButton("✉️ Создать опрос", callback_data="start_create")])
-        kb.append([InlineKeyboardButton("📩 Мои опросы", callback_data="start_feedbacks")])
-        kb.append([InlineKeyboardButton("!Дать админку другому челу!", callback_data="start_grand_admin")])
+        kb.append(
+            [InlineKeyboardButton("✉️ Создать опрос", callback_data="start_create")]
+        )
+        kb.append(
+            [InlineKeyboardButton("📩 Мои опросы", callback_data="start_feedbacks")]
+        )
+        kb.append(
+            [
+                InlineKeyboardButton(
+                    "!Дать админку другому челу!", callback_data="start_grand_admin"
+                )
+            ]
+        )
     markup = InlineKeyboardMarkup(kb)
 
     msg.reply_text("Привет иди нахуй это дев!", reply_markup=markup)
@@ -85,7 +95,9 @@ def help(update: Update, context: CallbackContext) -> int:
     else:
         new_text = STR_USER_HELP
     try:
-        msg.edit_text(new_text, reply_markup=InlineKeyboardMarkup([]), parse_mode="HTML")
+        msg.edit_text(
+            new_text, reply_markup=InlineKeyboardMarkup([]), parse_mode="HTML"
+        )
     except:
         msg.reply_text(new_text, parse_mode="HTML")
     return ConversationHandler.END
@@ -161,8 +173,8 @@ def create_welcome(update: Update, context: CallbackContext) -> int:
 
     update.message.reply_photo(
         caption=f"Название опроса: {name}\n\n"
-                + "ссылочку откройте молодой человек"
-                + f"\n{f'https://t.me/{update.message.bot.username}?start={name}'}",
+        + "ссылочку откройте молодой человек"
+        + f"\n{f'https://t.me/{update.message.bot.username}?start={name}'}",
         photo=open(url, "rb"),
     )
 
@@ -188,13 +200,13 @@ def my_feedbacks(update: Update, context: CallbackContext):
             context.user_data["current_feedback_scroll_id"] -= 1
             if context.user_data["current_feedback_scroll_id"] < 0:
                 context.user_data["current_feedback_scroll_id"] = (
-                        len(context.user_data["feedback_scroll_ids"]) - 1
+                    len(context.user_data["feedback_scroll_ids"]) - 1
                 )
         if data == "feedback_scroll_right":
             context.user_data["current_feedback_scroll_id"] += 1
             if (
-                    len(context.user_data["feedback_scroll_ids"])
-                    <= context.user_data["current_feedback_scroll_id"]
+                len(context.user_data["feedback_scroll_ids"])
+                <= context.user_data["current_feedback_scroll_id"]
             ):
                 context.user_data["current_feedback_scroll_id"] = 0
 
@@ -221,11 +233,11 @@ def my_feedbacks(update: Update, context: CallbackContext):
         f"https://t.me/{bot_name}?start={welcome.name.lower()}", code_url
     )
     caption = (
-            welcome.name
-            + "\n"
-            + welcome.message
-            + f"\n\n{welcome_id}"
-            + f"\n\n{f'https://t.me/{msg.bot.username}?start={welcome.name}'}"
+        welcome.name
+        + "\n"
+        + welcome.message
+        + f"\n\n{welcome_id}"
+        + f"\n\n{f'https://t.me/{msg.bot.username}?start={welcome.name}'}"
     )
 
     try:
@@ -371,13 +383,13 @@ def my_history(update: Update, context: CallbackContext):
             context.user_data["current_history_scroll_id"] -= 1
             if context.user_data["current_history_scroll_id"] < 0:
                 context.user_data["current_history_scroll_id"] = (
-                        len(context.user_data["history_scroll_ids"]) - 1
+                    len(context.user_data["history_scroll_ids"]) - 1
                 )
         if data == "history_scroll_right":
             context.user_data["current_history_scroll_id"] += 1
             if (
-                    len(context.user_data["history_scroll_ids"])
-                    <= context.user_data["current_history_scroll_id"]
+                len(context.user_data["history_scroll_ids"])
+                <= context.user_data["current_history_scroll_id"]
             ):
                 context.user_data["current_history_scroll_id"] = 0
 
@@ -543,7 +555,7 @@ def main():
 
     dp = updater.dispatcher
 
-    dp.add_handler(CallbackQueryHandler(grant_admin, pattern=r'start_grand_admin'))
+    dp.add_handler(CallbackQueryHandler(grant_admin, pattern=r"start_grand_admin"))
 
     feedback = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
