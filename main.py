@@ -355,6 +355,7 @@ def main():
         token = config.TOKEN
 
     print(token, args)
+    print("STARTING FUCKING BOT")
 
     updater = Updater(token, use_context=True)
     dp = updater.dispatcher
