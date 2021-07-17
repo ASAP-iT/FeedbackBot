@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  feedback-bot:
+    build: .
+    container_name: feedbackbot-dev
+    environment:
+      TOKEN: "1902701325:AAGmZcAOWZoS53VHxG3F6L0-Qn89VxzAzl8"
+    restart: always
+
+networks:
+  default:
+    name: feedbackbot-dev

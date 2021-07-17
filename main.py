@@ -7,6 +7,7 @@ import config
 import models
 from database import engine, SessionLocal
 import transliterate
+import sys
 
 SELECT_TYPE, FEEDBACK, WANTS_REPLY = range(3)
 CHOOSE_NAME, CREATE_WELCOME = range(2)
@@ -346,7 +347,14 @@ def main():
     import os
     os.system("mkdir codes")
 
-    updater = Updater(config.TOKEN, use_context=True)
+    args = sys.argv
+
+    if len(args) == 2:
+        token = args[1]
+    else:
+        token = config.TOKEN
+
+    updater = Updater(token, use_context=True)
     dp = updater.dispatcher
 
     feedback = ConversationHandler(
