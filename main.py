@@ -379,7 +379,7 @@ def welcome_edit_desc(update: Update, context: CallbackContext):
         [InlineKeyboardButton("back", callback_data="edit_welcome_back")]
     ])
 
-    msg.edit_text("новый дескришн:", reply_markup=markup)
+    msg.edit_text("новый дескрипшн:", reply_markup=markup)
 
     return 0
 
@@ -425,6 +425,16 @@ def new_description(update: Update, context: CallbackContext):
     return ConversationHandler.END
 
 
+def send_to_admins(bot, txt: str, parse_mode=None, **kwargs):
+    try:
+        for admin_id in config.admins:
+            bot.sendMessage(text=txt, chat_id=admin_id, parse_mode=parse_mode)
+    except Exception as err:
+        print(err)
+
+
+# pls, do not delete stuff below
+# noinspection PyTypeChecker
 def main():
     models.Base.metadata.create_all(bind=engine)
 
@@ -442,6 +452,9 @@ def main():
     print("STARTING FUCKING BOT")
 
     updater = Updater(token, use_context=True)
+
+    send_to_admins(updater.bot, "Прогреваю код\n\n\nВылетаю разносить ебла пользователей")
+
     dp = updater.dispatcher
 
     feedback = ConversationHandler(
