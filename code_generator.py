@@ -15,3 +15,5 @@ def generate_qr_code(data: str, img_name: str):
 
     img = qr.make_image(fill_color="black", back_color="white")
     img.save(img_name)
+
+    print("Creating img:", img_name)
