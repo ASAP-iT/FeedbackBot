@@ -4,7 +4,7 @@ services:
   feedback-bot:
     build: .
     container_name: feedbackbot-dev
-    args:
+    environment:
       TOKEN: "1902701325:AAGmZcAOWZoS53VHxG3F6L0-Qn89VxzAzl8"
     restart: always
 
