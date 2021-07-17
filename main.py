@@ -444,10 +444,11 @@ def send_to_admins(bot, txt: str, parse_mode=None, **kwargs):
 
 
 def grant_admin(update: Update, context: CallbackContext):
-    is_admin = FeedbackMethods.is_admin(SessionLocal(), update.message.chat_id)
+    msg = update.callback_query.message
+
+    is_admin = FeedbackMethods.is_admin(SessionLocal(), msg.chat_id)
     if is_admin:
         token = FeedbackMethods.create_token(SessionLocal())
-        msg = update.callback_query.message
         msg.reply_text(f"ваш токн: https://t.me/{msg.bot.username}?start={token}")
 
 

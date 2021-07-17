@@ -51,7 +51,7 @@ class AdminUser(Base):
     __tablename__ = "admins"
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer)
+    user_id = Column(Integer, unique=True)
 
 
 class OneTimeToken(Base):

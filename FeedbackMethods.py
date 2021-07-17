@@ -228,7 +228,10 @@ class FeedbackMethods:
         )
 
         db.add(admin)
-        db.commit()
+        try:
+            db.commit()
+        except:
+            pass
 
     @staticmethod
     def create_user(db: Session, user_id: int):
