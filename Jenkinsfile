@@ -11,6 +11,11 @@ pipeline {
                 branch "main"
             }
 
+            withCredentials([file(credentialsId: 'feedback_bot', variable: 'feedback_bot')]) {
+               sh "cp \$feedback_bot feedback-bot.env"
+               sh "cp \$feedback_bot feedback-bot.env"
+            }
+
             steps {
                 echo "Deploying and Building..."
                 sh "sendNotification '#Feedback_Bot 🛠 Building New Container #${BUILD_NUMBER}'"
@@ -27,6 +32,11 @@ pipeline {
         stage("Deploy Dev") {
             when {
                 branch "dev"
+            }
+
+            withCredentials([file(credentialsId: 'feedback_bot', variable: 'feedback_bot')]) {
+               sh "cp \$feedback_bot feedback-bot.env"
+               sh "cp \$feedback_bot feedback-bot.env"
             }
 
             steps {

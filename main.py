@@ -4,6 +4,7 @@ from telegram.ext import *
 import models
 from FeedbackMethods import FeedbackMethods
 import config
+from dotenv import load_dotenv
 from bot_methods.feedback_methods import (
     SELECT_TYPE,
     select_type,
@@ -37,6 +38,7 @@ from bot_methods.welcome_methods import (
 from deeplink_generator import create_deeplink
 from texts import *
 from database import engine, SessionLocal
+
 import sys
 
 
@@ -159,10 +161,12 @@ def error_shit(update: Update, context: CallbackContext):
 # pls, do not delete stuff below
 # noinspection PyTypeChecker
 def main():
+    load_dotenv("feedback-bot.env")
+
     models.Base.metadata.create_all(bind=engine)
 
     import os
-
+    bot_token = os.environ.get("BOT_TOKEN")
     os.system("mkdir codes")
 
     args = sys.argv
@@ -178,7 +182,7 @@ def main():
     updater = Updater(token, use_context=True)
 
     send_to_admins(
-        updater.bot, "Прогреваю код\n\n\nВылетаю разносить ебла пользователей"
+        updater.bot, f"Прогреваю код\n\n\nВылетаю разносить ебла пользователей\n{bot_token}"
     )
 
     dp = updater.dispatcher
