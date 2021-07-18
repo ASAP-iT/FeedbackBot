@@ -89,7 +89,13 @@ def wants_reply(update: Update, context: CallbackContext):
 
     markup = InlineKeyboardMarkup(kb)
 
-    msg.bot.send_message(admin_id, STR_NEW_FEEDBACK.format(name=fb_msg.welcome_message.name, message=fb_msg.message), reply_markup=markup)
+    msg.bot.send_message(
+        admin_id,
+        STR_NEW_FEEDBACK.format(
+            name=fb_msg.welcome_message.name, message=fb_msg.message
+        ),
+        reply_markup=markup,
+    )
 
     return ConversationHandler.END
 
@@ -138,7 +144,9 @@ def my_history(update: Update, context: CallbackContext):
 
     markup = InlineKeyboardMarkup(kb)
 
-    text = STR_HISTORY_ITEM.format(name=feedback.welcome_message.name, message=feedback.message)
+    text = STR_HISTORY_ITEM.format(
+        name=feedback.welcome_message.name, message=feedback.message
+    )
 
     try:
         msg.edit_text(text, reply_markup=markup)
