@@ -8,7 +8,7 @@ from telegram.ext import CallbackContext, ConversationHandler
 import code_generator
 from FeedbackMethods import FeedbackMethods
 from database import SessionLocal
-from commands import *
+from texts import *
 from deeplink_generator import create_deeplink
 
 CHOOSE_NAME, CREATE_WELCOME = range(2)
@@ -26,7 +26,7 @@ def create_feedback(update: Update, context: CallbackContext) -> int:
         return ConversationHandler.END
 
     msg.edit_reply_markup(InlineKeyboardMarkup([]))
-    msg.reply_text("пиши название")
+    msg.reply_text(STR_NEW_WELCOME_NAME)
 
     return CHOOSE_NAME
 
@@ -37,7 +37,7 @@ def choose_name(update: Update, context: CallbackContext) -> int:
     try:
         transliterated = transliterate.translit(txt, reversed=True)
     except Exception:
-        update.message.reply_text("писать что ли не умеешь")
+        update.message.reply_text(STR_INVALID_WELCOME_NAME)
         return CHOOSE_NAME
 
     transliterated = transliterated.replace(" ", "_")
@@ -45,16 +45,16 @@ def choose_name(update: Update, context: CallbackContext) -> int:
     context.user_data["feedback_name"] = transliterated
 
     if FeedbackMethods.name_exists(SessionLocal(), transliterated) is True:
-        update.message.reply_text("Такое есть уже лох")
+        update.message.reply_text(STR_WELCOME_NAME_TAKEN)
         return CHOOSE_NAME
 
     markup = InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton("⬅️ Назад", callback_data=CALLBACK_CREATE_BACK)],
+            [InlineKeyboardButton(STR_BACK, callback_data=CALLBACK_CREATE_BACK)],
         ]
     )
 
-    update.message.reply_text(f"пиши приветствие {transliterated}", reply_markup=markup)
+    update.message.reply_text(STR_NEW_WELCOME_MESSAGE, reply_markup=markup)
 
     return CREATE_WELCOME
 
@@ -64,7 +64,7 @@ def create_welcome(update: Update, context: CallbackContext) -> int:
     welcome_txt = update.message.text
 
     if name is None or welcome_txt is None:
-        update.message.reply_text("хуита брат")
+        update.message.reply_text(STR_ERROR)
         return ConversationHandler.END
 
     welcome, url = FeedbackMethods.create_welcome(
@@ -75,13 +75,11 @@ def create_welcome(update: Update, context: CallbackContext) -> int:
         update.message.bot.username,
     )
     if welcome is None:
-        update.message.reply_text("хуита брат")
+        update.message.reply_text(STR_ERROR)
         return ConversationHandler.END
 
     update.message.reply_photo(
-        caption=f"Название опроса: {name}\n\n"
-        + "ссылочку откройте молодой человек"
-        + f"\n{create_deeplink(context.bot.username, name)}",
+        caption=STR_WELCOME_OVERVIEW.format(name=name, message=welcome_txt, link=create_deeplink(context.bot.username, name)),
         photo=open(url, "rb"),
     )
 
@@ -97,7 +95,7 @@ def my_feedbacks(update: Update, context: CallbackContext):
     ]
 
     if len(context.user_data["feedback_scroll_ids"]) == 0:
-        msg.reply_text("Пока опросом немае")
+        msg.reply_text(STR_NO_WELCOMES)
         return ConversationHandler.END
 
     if context.user_data.get("current_feedback_scroll_id") is None:
@@ -126,13 +124,13 @@ def my_feedbacks(update: Update, context: CallbackContext):
 
     kb = [
         [
-            InlineKeyboardButton("⬅️", callback_data=CALLBACK_FEEDBACK_LEFT),
-            InlineKeyboardButton("Edit", callback_data=f"welcome_edit-{welcome_id}"),
-            InlineKeyboardButton("➡️️", callback_data=CALLBACK_FEEDBACK_RIGHT),
+            InlineKeyboardButton(STR_ARROW_LEFT, callback_data=CALLBACK_FEEDBACK_LEFT),
+            InlineKeyboardButton(STR_WELCOME_EDIT, callback_data=f"welcome_edit-{welcome_id}"),
+            InlineKeyboardButton(STR_ARROW_RIGHT, callback_data=CALLBACK_FEEDBACK_RIGHT),
         ],
         [
             InlineKeyboardButton(
-                "УДОЛИТЬ", callback_data=f"edit_welcome_delete-{welcome_id}"
+                STR_WELCOME_DELETE, callback_data=f"edit_welcome_delete-{welcome_id}"
             )
         ],
     ]
@@ -144,13 +142,7 @@ def my_feedbacks(update: Update, context: CallbackContext):
     code_generator.generate_qr_code(
         create_deeplink(context.bot.username, welcome.name), code_url
     )
-    caption = (
-        welcome.name
-        + "\n"
-        + welcome.message
-        + f"\n\n{welcome_id}"
-        + f"\n\n{create_deeplink(context.bot.username, welcome.name)}"
-    )
+    caption = (STR_WELCOME_OVERVIEW.format(name=welcome.name, message=welcome.message, link=create_deeplink(context.bot.username, welcome.name)))
 
     try:
         msg.edit_media(
@@ -175,22 +167,22 @@ def welcome_edit(update: Update, context: CallbackContext):
     kb = [
         [
             InlineKeyboardButton(
-                "edit title (you will need to edit qr codes)",
+                STR_WELCOME_EDIT_TITLE,
                 callback_data=f"edit_welcome_title-{welcome_id}",
             )
         ],
         [
             InlineKeyboardButton(
-                "edit description",
+                STR_WELCOME_EDIT_DESCRIPTION,
                 callback_data=f"edit_welcome_description-{welcome_id}",
             )
         ],
-        [InlineKeyboardButton("<- back", callback_data=CALLBACK_WELCOME_BACK)],
+        [InlineKeyboardButton(STR_ARROW_LEFT, callback_data=CALLBACK_WELCOME_BACK)],
     ]
 
     markup = InlineKeyboardMarkup(kb)
 
-    msg.reply_text("чо редачить", reply_markup=markup)
+    msg.reply_text(STR_WELCOME_WHAT_TO_EDIT, reply_markup=markup)
 
     context.user_data["current_edit_id"] = welcome_id
 
@@ -207,10 +199,10 @@ def welcome_edit_desc(update: Update, context: CallbackContext):
     msg = update.callback_query.message
 
     markup = InlineKeyboardMarkup(
-        [[InlineKeyboardButton("back", callback_data=CALLBACK_WELCOME_BACK)]]
+        [[InlineKeyboardButton(STR_ARROW_LEFT, callback_data=CALLBACK_WELCOME_BACK)]]
     )
 
-    msg.edit_text("новый дескрипшн:", reply_markup=markup)
+    msg.edit_text(STR_WELCOME_NEW_DESCRPTION, reply_markup=markup)
 
     return 0
 
@@ -219,10 +211,10 @@ def welcome_edit_title(update: Update, context: CallbackContext):
     msg = update.callback_query.message
 
     markup = InlineKeyboardMarkup(
-        [[InlineKeyboardButton("back", callback_data=CALLBACK_WELCOME_BACK)]]
+        [[InlineKeyboardButton(STR_ARROW_LEFT, callback_data=CALLBACK_WELCOME_BACK)]]
     )
 
-    msg.edit_text("новый тайтл:", reply_markup=markup)
+    msg.edit_text(STR_WELCOME_NEW_TITLE, reply_markup=markup)
 
     return 0
 
@@ -233,7 +225,7 @@ def new_title(update: Update, context: CallbackContext):
     try:
         transliterated = transliterate.translit(new_t, reversed=True)
     except Exception:
-        update.message.reply_text("писать что ли не умеешь")
+        update.message.reply_text(STR_INVALID_WELCOME_NAME)
         return 0
 
     transliterated = transliterated.replace(" ", "_")
@@ -242,7 +234,7 @@ def new_title(update: Update, context: CallbackContext):
     FeedbackMethods.edit_welcome_title(
         SessionLocal(), context.user_data["current_edit_id"], transliterated
     )
-    update.message.reply_text("тайтл изменен!")
+    update.message.reply_text(STR_WELCOME_TITLE_EDITED)
 
     return ConversationHandler.END
 
@@ -253,7 +245,7 @@ def new_description(update: Update, context: CallbackContext):
     FeedbackMethods.edit_welcome_description(
         SessionLocal(), context.user_data["current_edit_id"], new_d
     )
-    update.message.reply_text("дескрипшн изменен!")
+    update.message.reply_text(STR_WELCOME_DESC_EDITED)
 
     return ConversationHandler.END
 
@@ -263,7 +255,7 @@ def delete_welcome(update: Update, context: CallbackContext):
 
     FeedbackMethods.delete_welcome(SessionLocal(), context.user_data["current_edit_id"])
 
-    msg.edit_text("УДОЛЕНО")
+    msg.edit_text(STR_WELCOME_DELETED)
     return ConversationHandler.END
 
 
@@ -276,14 +268,14 @@ def delete_welcome_ask(update: Update, context: CallbackContext):
     markup = InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton("No", callback_data=CALLBACK_YES),
-                InlineKeyboardButton("Yes", callback_data=CALLBACK_NO),
+                InlineKeyboardButton(STR_YES, callback_data=CALLBACK_YES),
+                InlineKeyboardButton(STR_NO, callback_data=CALLBACK_NO),
             ],
             # [InlineKeyboardButton("back", callback_data="edit_welcome_back")]
         ]
     )
     msg.delete()
-    msg.reply_text("Уверен?", reply_markup=markup)
+    msg.reply_text(STR_DELETE_ASK, reply_markup=markup)
 
     return 0
 
