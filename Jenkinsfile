@@ -38,8 +38,6 @@ pipeline {
 
             steps {
                 withCredentials([file(credentialsId: 'feedback_bot', variable: 'feedback_env')]) {
-                    sh "pwd"
-                    sh "ls -a"
                     sh "cp \"${feedback_env}\" \"feedback-bot.env\""
                     sh "cp \"${feedback_env}\" \"feedback-bot.env\""
 
