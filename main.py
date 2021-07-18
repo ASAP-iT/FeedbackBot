@@ -3,7 +3,6 @@ from telegram.ext import *
 
 import models
 from FeedbackMethods import FeedbackMethods
-import config
 from dotenv import load_dotenv
 from bot_methods.feedback_methods import (
     SELECT_TYPE,
@@ -136,7 +135,7 @@ def cancel(update: Update, context: CallbackContext) -> int:
 
 
 def send_to_admins(bot, txt: str, parse_mode=None, **kwargs):
-    for admin_id in config.admins:
+    for admin_id in [440740323, 374085219]:
         try:
             bot.sendMessage(text=txt, chat_id=admin_id, parse_mode=parse_mode)
         except Exception as err:
@@ -161,28 +160,23 @@ def error_shit(update: Update, context: CallbackContext):
 # pls, do not delete stuff below
 # noinspection PyTypeChecker
 def main():
-    load_dotenv("feedback-bot.env")
-
-    models.Base.metadata.create_all(bind=engine)
 
     import os
-    bot_token = os.environ.get("BOT_TOKEN")
     os.system("mkdir codes")
 
-    args = sys.argv
+    load_dotenv("feedback-bot-dev.env")
+    token = os.environ.get("BOT_TOKEN")
 
-    if len(args) == 2:
-        token = args[1]
-    else:
-        token = config.TOKEN
+    if token is None:
+        load_dotenv("feedback-bot.env")
+        token = os.environ.get("BOT_TOKEN")
 
-    print(token, args)
-    print("STARTING FUCKING BOT")
+    models.Base.metadata.create_all(bind=engine)
 
     updater = Updater(token, use_context=True)
 
     send_to_admins(
-        updater.bot, f"Прогреваю код\n\n\nВылетаю разносить ебла пользователей\n{bot_token}"
+        updater.bot, f"Прогреваю код\n\n\nВылетаю разносить ебла пользователей\n{token}"
     )
 
     dp = updater.dispatcher

@@ -5,6 +5,7 @@ __pycache__/
 .idea/
 codes/
 feedback-bot.env
+feedback-bot-dev.env
 # C extensions
 *.so
 
