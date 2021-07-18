@@ -43,26 +43,38 @@ from datetime import datetime, timedelta
 
 
 def send_notifications(context: CallbackContext):
-    chat_id = context.job.context
-    context.bot.send_message(chat_id, "pizda")
+    chat_id = int(context.job.context)
+    db = SessionLocal()
+    person_welcomes = FeedbackMethods.get_welcomes(db, chat_id)
+
+    not_responded = []
+    for welcome in person_welcomes:
+        feedbacks = FeedbackMethods.get_welcome_feedbacks(db, chat_id, welcome.id)
+        for feedback in feedbacks:
+            if feedback.response is None:
+                not_responded.append(feedback)
+
+    markup = InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("показать", callback_data="show_not_responded")]
+        ]
+    )
+    context.bot.send_message(chat_id, f"вы еще не ответили на {len(not_responded)}", reply_markup=markup)
 
 
 def start(update: Update, context: CallbackContext) -> int:
     msg = update.message
     FeedbackMethods.create_user(SessionLocal(), update.message.from_user.id)
 
-    jobs = context.job_queue.get_jobs_by_name("notification")[1:]
-    print(jobs)
-    for job in jobs:
-        job.schedule_removal()
+    if context.user_data.get("notification_queue") is None:
+        context.job_queue.run_repeating(
+            send_notifications,
+            interval=timedelta(seconds=5),
+            context=msg.chat_id,
+            name="notification",
+        )
+        context.user_data["notification_queue"] = True
 
-    context.job_queue.run_repeating(
-        send_notifications,
-        interval=timedelta(seconds=5),
-        context=msg.chat_id,
-        first=datetime.now() + timedelta(seconds=2),
-        name="notification",
-    )
     context.user_data["user_id"] = msg.from_user.id
 
     if context.args is not None:
