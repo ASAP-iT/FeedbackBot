@@ -302,6 +302,6 @@ def reply_message(update: Update, context: CallbackContext):
         SessionLocal(), context.user_data["current_reply_feedback_id"]
     )
 
-    update.message.bot.send_message(feedback.from_user_id, f"вам посылка\n{msg}")
+    update.message.bot.send_message(feedback.from_user_id, STR_FEEDBACK_REPLY.format(name=feedback.welcome_message.name, message=msg))
 
     return ConversationHandler.END

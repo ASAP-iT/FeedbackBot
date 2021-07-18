@@ -71,7 +71,7 @@ STR_WELCOME_EDIT = "Edit"
 STR_WELCOME_DELETE = "delete"
 
 
-STR_NEW_FEEDBACK = """
-У вас новое обращение по опросу: {name}
+STR_FEEDBACK_REPLY = """
+Вам ответили по вашему обращению по опросу: {name}
 {message}
 """
