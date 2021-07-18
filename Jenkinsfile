@@ -13,6 +13,7 @@ pipeline {
 
             steps {
                 withCredentials([file(credentialsId: 'feedback_bot', variable: 'feedback_env')]) {
+                    sh "pwd"
                     sh "cp \"${feedback_env}\" \"feedback-bot.env\""
 
                     echo "Deploying and Building..."
