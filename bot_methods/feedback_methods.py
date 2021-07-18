@@ -151,6 +151,9 @@ def my_history(update: Update, context: CallbackContext):
         name=feedback.welcome_message.name, message=feedback.message
     )
 
+    if len(context.user_data["history_scroll_ids"]) == 0:
+        return ConversationHandler.END
+
     try:
         msg.edit_text(text, reply_markup=markup)
     except:

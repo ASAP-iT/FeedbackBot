@@ -163,6 +163,9 @@ def my_feedbacks(update: Update, context: CallbackContext):
         link=create_deeplink(context.bot.username, welcome.name),
     )
 
+    if len(context.user_data["feedback_scroll_ids"]) == 0:
+        return ConversationHandler.END
+
     try:
         msg.edit_media(
             media=InputMediaPhoto(media=open(code_url, "rb"), caption=caption),
@@ -386,6 +389,9 @@ def welcome_feedbacks(update: Update, context: CallbackContext):
         text = STR_HISTORY_ITEM.format(
             name=feedback.welcome_message.name, message=feedback.message
         )
+
+    if len(context.user_data["history_feedbacks_scroll_ids"]) == 0:
+        return ConversationHandler.END
 
     try:
         msg.edit_text(text, reply_markup=markup)
