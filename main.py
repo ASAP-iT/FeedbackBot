@@ -34,6 +34,7 @@ from bot_methods.welcome_methods import (
     create_feedback_back,
     my_feedbacks,
 )
+from deeplink_generator import create_deeplink
 from texts import *
 from database import engine, SessionLocal
 import transliterate
@@ -54,18 +55,18 @@ def start(update: Update, context: CallbackContext) -> int:
 
             if welcome is None:
                 if FeedbackMethods.delete_token(SessionLocal(), welcome_name) is None:
-                    msg.reply_markdown_v2("naebat hotel?")
+                    msg.reply_markdown_v2(STR_INVALID_LINK)
                     return ConversationHandler.END
                 else:
                     FeedbackMethods.create_admin(SessionLocal(), msg.chat_id)
-                    msg.reply_markdown_v2("pizda vi admin")
+                    msg.reply_markdown_v2(STR_ADMIN_WELCOME)
                     return ConversationHandler.END
 
             keyboard = [
-                [InlineKeyboardButton("хуй", callback_data="complain")],
-                [InlineKeyboardButton("pizda", callback_data="suggest")],
-                [InlineKeyboardButton("asdf", callback_data="praise")],
-                [InlineKeyboardButton("fdsa", callback_data="else")],
+                [InlineKeyboardButton(STR_FEEDBACK_COMPLAIN, callback_data="complain")],
+                [InlineKeyboardButton(STR_FEEDBACK_SUGGEST, callback_data="suggest")],
+                [InlineKeyboardButton(STR_FEEDBACK_PRAISE, callback_data="praise")],
+                [InlineKeyboardButton(STR_FEEDBACK_ELSE, callback_data="else")],
             ]
 
             markup = InlineKeyboardMarkup(keyboard)
@@ -74,47 +75,44 @@ def start(update: Update, context: CallbackContext) -> int:
             context.user_data["welcome_name"] = welcome.name
 
             update.message.reply_text(
-                f"{welcome.name}\n\n{welcome.message}", reply_markup=markup
+                STR_WELCOME_TEXT.format(name=welcome.name, message=welcome.message), reply_markup=markup
             )
 
             return SELECT_TYPE
 
     kb = [
         [
-            InlineKeyboardButton("🙋 Помощь", callback_data="start_help"),
-            InlineKeyboardButton("💬 Мои ответы", callback_data="start_history"),
+            InlineKeyboardButton(STR_START_HELP, callback_data="start_help"),
+            InlineKeyboardButton(STR_START_HISTORY, callback_data="start_history"),
         ],
     ]
 
     if FeedbackMethods.is_admin(SessionLocal(), update.message.chat_id):
         kb.append(
             [
-                InlineKeyboardButton("✉️ Создать опрос", callback_data="start_create"),
-                InlineKeyboardButton("📩 Мои опросы", callback_data="start_feedbacks"),
+                InlineKeyboardButton(STR_START_CREATE_WELCOME, callback_data="start_create"),
+                InlineKeyboardButton(STR_START_ME_WELCOMES, callback_data="start_feedbacks"),
             ]
         )
         kb.append(
             [
                 InlineKeyboardButton(
-                    "!Дать админку другому челу!", callback_data="start_grand_admin"
+                    STR_SHARE_ADMIN, callback_data="start_grand_admin"
                 )
             ]
         )
     markup = InlineKeyboardMarkup(kb)
 
-    msg.reply_text("Привет иди нахуй это дев!", reply_markup=markup)
+    msg.reply_text(STR_START_MSG, reply_markup=markup)
 
     return ConversationHandler.END
 
 
 def help(update: Update, context: CallbackContext) -> int:
-    print("help")
     if update.message is None:
         msg = update.callback_query.message
-        print("callback")
     else:
         msg = update.message
-        print("command")
 
     is_admin = FeedbackMethods.is_admin(SessionLocal(), msg.chat.id)
     if is_admin:
@@ -131,7 +129,7 @@ def help(update: Update, context: CallbackContext) -> int:
 
 
 def cancel(update: Update, context: CallbackContext) -> int:
-    update.message.reply_text("Отмена")
+    update.message.reply_text(STR_CANCEL)
     return ConversationHandler.END
 
 
@@ -149,7 +147,7 @@ def grant_admin(update: Update, context: CallbackContext):
     is_admin = FeedbackMethods.is_admin(SessionLocal(), msg.chat_id)
     if is_admin:
         token = FeedbackMethods.create_token(SessionLocal())
-        msg.reply_text(f"ваш токн: https://t.me/{msg.bot.username}?start={token}")
+        msg.reply_text(STR_YOUR_TOKEN.format(token=create_deeplink(context.bot.username, token)))
 
 
 # pls, do not delete stuff below
