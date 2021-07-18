@@ -337,7 +337,7 @@ class FeedbackMethods:
         )
 
         feedbacks = (
-            db.query(WelcomeMessage)
+            db.query(FeedbackMessage)
             .filter(FeedbackMessage.welcome_message_id == welcome.id)
             .all()
         )
