@@ -151,7 +151,7 @@ def my_history(update: Update, context: CallbackContext):
         name=feedback.welcome_message.name, message=feedback.message
     )
 
-    if len(context.user_data["history_scroll_ids"]) == 1:
+    if msg.text == text.strip():
         return ConversationHandler.END
 
     try:
