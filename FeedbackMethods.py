@@ -343,6 +343,7 @@ class FeedbackMethods:
         )
         for feedback in feedbacks:
             db.delete(feedback)
-
+        db.commit()
+        db.flush()
         db.delete(welcome)
         db.commit()
