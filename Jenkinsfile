@@ -13,12 +13,12 @@ pipeline {
 
             steps {
                 echo "Deploying and Building..."
-                sh "sendNotification '#Feedback_Bot ${BUILD_TAG} 🛠 Building New Container...'"
+                sh "sendNotification '#Feedback_Bot 🛠 Building New Container #${BUILD_NUMBER}'"
                 sh "docker-compose build"
-                sh "sendNotification '#Feedback_Bot ${BUILD_TAG} ⛔️️ Stopping Previous Container...'"
+                sh "sendNotification '#Feedback_Bot ⛔️️ Stopping Previous Container #${BUILD_NUMBER}'"
                 echo "Stopping previous container..."
                 sh "docker-compose down"
-                sh "sendNotification '#Feedback_Bot ${BUILD_TAG} 🐳 Upping New Container...'"
+                sh "sendNotification '#Feedback_Bot 🐳 Upping New Container #${BUILD_NUMBER}'"
                 sh "docker-compose up -d"
                 echo "Deployed!"
             }
@@ -31,12 +31,12 @@ pipeline {
 
             steps {
                 echo "Deploying and Building..."
-                sh "sendNotification '#Feedback_Bot_Dev ${BUILD_TAG} 🛠 Building New Container...'"
+                sh "sendNotification '#Feedback_Bot_Dev 🛠 Building New Container #${BUILD_NUMBER}'"
                 sh "docker-compose -f docker-compose-dev.yml build"
-                sh "sendNotification '#Feedback_Bot_Dev ${BUILD_TAG} ⛔️️ Stopping Previous Container...'"
+                sh "sendNotification '#Feedback_Bot_Dev ⛔️️ Stopping Previous Container #${BUILD_NUMBER}'"
                 echo "Stopping previous container..."
                 sh "docker-compose -f docker-compose-dev.yml down"
-                sh "sendNotification '#Feedback_Bot_Dev ${BUILD_TAG} 🐳 Upping New Container...'"
+                sh "sendNotification '#Feedback_Bot_Dev 🐳 Upping New Container #${BUILD_NUMBER}'"
                 sh "docker-compose -f docker-compose-dev.yml up -d"
                 echo "Deployed!"
             }
