@@ -12,15 +12,20 @@ pipeline {
             }
 
             steps {
-                echo "Deploying and Building..."
-                notifyEvents message: "#Feedback_Bot 🛠 Building New Container...", token: '7yi9o1VBd3mz-JP2JhQOICo3Y5zgPHGk'
-                sh "docker-compose build"
-                notifyEvents message: "#Feedback_Bot ⛔️️ Stopping Previous Container...", token: '7yi9o1VBd3mz-JP2JhQOICo3Y5zgPHGk'
-                echo "Stopping previous container..."
-                sh "docker-compose down"
-                notifyEvents message: "#Feedback_Bot 🐳 Upping New Container...", token: '7yi9o1VBd3mz-JP2JhQOICo3Y5zgPHGk'
-                sh "docker-compose up -d"
-                echo "Deployed!"
+                withCredentials([file(credentialsId: 'feedback_bot', variable: 'feedback_main_env')]) {
+                    sh "pwd"
+                    sh "cp \"${feedback_main_env}\" \"feedback-bot.env\""
+
+                    echo "Deploying and Building..."
+                    sh "sendNotification '#Feedback_Bot 🛠 Building New Container #${BUILD_NUMBER}'"
+                    sh "docker-compose build"
+                    sh "sendNotification '#Feedback_Bot ⛔️️ Stopping Previous Container #${BUILD_NUMBER}'"
+                    echo "Stopping previous container..."
+                    sh "docker-compose down"
+                    sh "sendNotification '#Feedback_Bot 🐳 Upping New Container #${BUILD_NUMBER}'"
+                    sh "docker-compose up -d"
+                    echo "Deployed!"
+                }
             }
         }
 
@@ -30,25 +35,30 @@ pipeline {
             }
 
             steps {
-                echo "Deploying and Building..."
-                notifyEvents message: "#Feedback_Bot 🛠 Building New Container...", token: '7yi9o1VBd3mz-JP2JhQOICo3Y5zgPHGk'
-                sh "docker-compose -f docker-compose-dev.yml build"
-                notifyEvents message: "#Feedback_Bot ⛔️️ Stopping Previous Container...", token: '7yi9o1VBd3mz-JP2JhQOICo3Y5zgPHGk'
-                echo "Stopping previous container..."
-                sh "docker-compose -f docker-compose-dev.yml down"
-                notifyEvents message: "#Feedback_Bot 🐳 Upping New Container...", token: '7yi9o1VBd3mz-JP2JhQOICo3Y5zgPHGk'
-                sh "docker-compose -f docker-compose-dev.yml up -d"
-                echo "Deployed!"
+                withCredentials([file(credentialsId: 'feedback_bot_dev', variable: 'feedback_dev_env')]) {
+                    sh "pwd"
+                    sh "cp \"${feedback_dev_env}\" \"feedback-bot-dev.env\""
+
+                    echo "Deploying and Building..."
+                    sh "sendNotification '#Feedback_Bot_Dev 🛠 Building New Container #${BUILD_NUMBER}'"
+                    sh "docker-compose -f docker-compose-dev.yml build"
+                    sh "sendNotification '#Feedback_Bot_Dev ⛔️️ Stopping Previous Container #${BUILD_NUMBER}'"
+                    echo "Stopping previous container..."
+                    sh "docker-compose -f docker-compose-dev.yml down"
+                    sh "sendNotification '#Feedback_Bot_Dev 🐳 Upping New Container #${BUILD_NUMBER}'"
+                    sh "docker-compose -f docker-compose-dev.yml up -d"
+                    echo "Deployed!"
+                }
             }
         }
     }
 
     post {
         success {
-            notifyEvents message: "#Feedback_Bot 🥃 Deploy Succeed 😍💕😋😎️", token: '7yi9o1VBd3mz-JP2JhQOICo3Y5zgPHGk'
+            sh "sendNotification '#Feedback_Bot 🥃 Deploy Succeed 😍💕😋😎️'"
         }
         failure {
-            notifyEvents message: '#Feedback_Bot 🛑 Deploy Failed  😩😑😖😳', token: '7yi9o1VBd3mz-JP2JhQOICo3Y5zgPHGk'
+            sh "sendNotification '#Feedback_Bot 🛑 Deploy Failed  😩😑😖😳'"
         }
     }
 }

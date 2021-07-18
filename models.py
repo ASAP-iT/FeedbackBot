@@ -11,7 +11,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
-    BigInteger
+    BigInteger,
 )
 
 from sqlalchemy.orm import relationship

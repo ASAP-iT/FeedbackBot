@@ -5,8 +5,16 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from config import DB_URL
+from dotenv import load_dotenv
+import os
 
-engine = create_engine(DB_URL)
+load_dotenv("feedback-bot-dev.env")
+url = os.environ.get("DB_URL")
+
+if url is None:
+    load_dotenv("feedback-bot.env")
+    url = os.environ.get("DB_URL")
+
+engine = create_engine(url)
 Base = declarative_base()
 SessionLocal = sessionmaker(bind=engine)
