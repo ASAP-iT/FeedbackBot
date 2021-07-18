@@ -312,6 +312,14 @@ class FeedbackMethods:
         )
 
     @staticmethod
+    def get_welcome_feedbacks(db: Session, chat_id: int, welcome_id: int) -> List[FeedbackMessage]:
+        return (
+            db.query(FeedbackMessage)
+                .filter(FeedbackMessage.from_user_id == chat_id and FeedbackMessage.welcome_message_id == welcome_id)
+                .all()
+        )
+
+    @staticmethod
     def edit_welcome_title(db: Session, welcome_id: int, title: str):
         welcome: WelcomeMessage = (
             db.query(WelcomeMessage).filter(WelcomeMessage.id == welcome_id).first()

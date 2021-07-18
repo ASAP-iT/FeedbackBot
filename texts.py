@@ -69,6 +69,7 @@ STR_WELCOME_DELETED = "DELETED"
 STR_DELETE_ASK = "Точно удалить?"
 STR_YES = "Да"
 STR_NO = "Нет"
+STR_WELCOME_SHOW_FEEDBACKS = "Посмотреть фидбэки опроса"
 
 STR_ARROW_LEFT = "⬅️"
 STR_ARROW_RIGHT = "➡️️"
@@ -93,4 +94,9 @@ STR_THANKS_FOR_FEEDBACK = "Спс за отзыв чел"
 STR_NEW_FEEDBACK = """
 У вас новое обращение по опросу: {name}
 Сообщение: {message}
+"""
+STR_HISTORY_FEEDBACK_ITEM = """
+Опрос: {name}
+Сообщение: {message}
+Ответ: {response}
 """

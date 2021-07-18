@@ -27,6 +27,8 @@ def select_type(update: Update, context: CallbackContext):
         msg.edit_text(STR_ERROR)
         return ConversationHandler.END
 
+    context.user_data["reply_type"] = type
+
     return FEEDBACK
 
 
@@ -65,8 +67,6 @@ def wants_reply(update: Update, context: CallbackContext):
     else:
         msg.edit_text(STR_THANKS_FOR_FEEDBACK)
 
-    context.user_data["reply_type"] = data
-
     fb_msg = FeedbackMethods.create_feedback(
         SessionLocal(),
         welcome_id=context.user_data["welcome_id"],
@@ -78,14 +78,17 @@ def wants_reply(update: Update, context: CallbackContext):
 
     admin_id = fb_msg.welcome_message.chat_id
 
-    kb = [
-        [
-            InlineKeyboardButton(
-                STR_REPLY_TO_FEEDBACK,
-                callback_data=f"reply_to_feedback-{fb_msg.id}",
-            )
+    if data == CALLBACK_YES:
+        kb = [
+            [
+                InlineKeyboardButton(
+                    STR_REPLY_TO_FEEDBACK,
+                    callback_data=f"reply_to_feedback-{fb_msg.id}",
+                )
+            ]
         ]
-    ]
+    else:
+        kb = []
 
     markup = InlineKeyboardMarkup(kb)
 

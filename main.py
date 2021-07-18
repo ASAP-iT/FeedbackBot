@@ -1,7 +1,6 @@
 from telegram import *
 from telegram.ext import *
 
-import code_generator
 import models
 from FeedbackMethods import FeedbackMethods
 import config
@@ -32,12 +31,11 @@ from bot_methods.welcome_methods import (
     choose_name,
     create_welcome,
     create_feedback_back,
-    my_feedbacks,
+    my_feedbacks, welcome_feedbacks,
 )
 from deeplink_generator import create_deeplink
 from texts import *
 from database import engine, SessionLocal
-import transliterate
 import sys
 
 
@@ -252,6 +250,10 @@ def main():
 
     dp.add_handler(
         CallbackQueryHandler(edit_welcome_back, pattern=fr"{CALLBACK_WELCOME_BACK}")
+    )
+
+    dp.add_handler(
+        CallbackQueryHandler(welcome_feedbacks, pattern=fr"{CALLBACK_HISTORY_FEEDBACKS}")
     )
 
     dp.add_handler(
