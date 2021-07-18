@@ -152,7 +152,6 @@ def my_feedbacks(update: Update, context: CallbackContext):
 
     markup = InlineKeyboardMarkup(kb)
 
-    bot_name = update.callback_query.message.bot.username
     code_url = f"codes/{welcome.name}.png"
     code_generator.generate_qr_code(
         create_deeplink(context.bot.username, welcome.name), code_url
@@ -163,7 +162,10 @@ def my_feedbacks(update: Update, context: CallbackContext):
         link=create_deeplink(context.bot.username, welcome.name),
     )
 
-    if len(context.user_data["feedback_scroll_ids"]) == 1:
+    # if len(context.user_data["feedback_scroll_ids"]) == 1:
+    #     return ConversationHandler.END
+
+    if msg.caption == caption.strip():
         return ConversationHandler.END
 
     try:
@@ -171,7 +173,7 @@ def my_feedbacks(update: Update, context: CallbackContext):
             media=InputMediaPhoto(media=open(code_url, "rb"), caption=caption),
             reply_markup=markup,
         )
-    except:
+    except Exception as e:
         try:
             msg.delete()
         except:
@@ -402,7 +404,7 @@ def welcome_feedbacks(update: Update, context: CallbackContext):
             name=feedback.welcome_message.name, message=feedback.message
         )
 
-    if len(context.user_data["history_feedbacks_scroll_ids"]) == 1:
+    if msg.text == text.strip():
         return ConversationHandler.END
 
     try:
