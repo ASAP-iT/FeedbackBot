@@ -78,8 +78,8 @@ def create_welcome(update: Update, context: CallbackContext) -> int:
 
     update.message.reply_photo(
         caption=f"Название опроса: {name}\n\n"
-                + "ссылочку откройте молодой человек"
-                + f"\n{f'https://t.me/{update.message.bot.username}?start={name}'}",
+        + "ссылочку откройте молодой человек"
+        + f"\n{f'https://t.me/{update.message.bot.username}?start={name}'}",
         photo=open(url, "rb"),
     )
 
@@ -105,13 +105,13 @@ def my_feedbacks(update: Update, context: CallbackContext):
             context.user_data["current_feedback_scroll_id"] -= 1
             if context.user_data["current_feedback_scroll_id"] < 0:
                 context.user_data["current_feedback_scroll_id"] = (
-                        len(context.user_data["feedback_scroll_ids"]) - 1
+                    len(context.user_data["feedback_scroll_ids"]) - 1
                 )
         if data == "feedback_scroll_right":
             context.user_data["current_feedback_scroll_id"] += 1
             if (
-                    len(context.user_data["feedback_scroll_ids"])
-                    <= context.user_data["current_feedback_scroll_id"]
+                len(context.user_data["feedback_scroll_ids"])
+                <= context.user_data["current_feedback_scroll_id"]
             ):
                 context.user_data["current_feedback_scroll_id"] = 0
 
@@ -143,11 +143,11 @@ def my_feedbacks(update: Update, context: CallbackContext):
         f"https://t.me/{bot_name}?start={welcome.name.lower()}", code_url
     )
     caption = (
-            welcome.name
-            + "\n"
-            + welcome.message
-            + f"\n\n{welcome_id}"
-            + f"\n\n{f'https://t.me/{msg.bot.username}?start={welcome.name}'}"
+        welcome.name
+        + "\n"
+        + welcome.message
+        + f"\n\n{welcome_id}"
+        + f"\n\n{f'https://t.me/{msg.bot.username}?start={welcome.name}'}"
     )
 
     try:

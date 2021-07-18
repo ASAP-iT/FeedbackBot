@@ -5,12 +5,35 @@ import code_generator
 import models
 from FeedbackMethods import FeedbackMethods
 import config
-from bot_methods.feedback_methods import SELECT_TYPE, select_type, FEEDBACK, feedback_msg, WANTS_REPLY, wants_reply, \
-    my_history
-from bot_methods.welcome_methods import reply_feedback, REPLY_TO_FEEDBACK, reply_message, welcome_edit, \
-    edit_welcome_back, welcome_edit_title, new_title, welcome_edit_desc, new_description, delete_welcome_ask, \
-    delete_welcome, create_feedback, CHOOSE_NAME, CREATE_WELCOME, choose_name, create_welcome, create_feedback_back, \
-    my_feedbacks
+from bot_methods.feedback_methods import (
+    SELECT_TYPE,
+    select_type,
+    FEEDBACK,
+    feedback_msg,
+    WANTS_REPLY,
+    wants_reply,
+    my_history,
+)
+from bot_methods.welcome_methods import (
+    reply_feedback,
+    REPLY_TO_FEEDBACK,
+    reply_message,
+    welcome_edit,
+    edit_welcome_back,
+    welcome_edit_title,
+    new_title,
+    welcome_edit_desc,
+    new_description,
+    delete_welcome_ask,
+    delete_welcome,
+    create_feedback,
+    CHOOSE_NAME,
+    CREATE_WELCOME,
+    choose_name,
+    create_welcome,
+    create_feedback_back,
+    my_feedbacks,
+)
 from texts import *
 from database import engine, SessionLocal
 import transliterate
