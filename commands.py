@@ -10,7 +10,9 @@ CALLBACK_GRANT_ADMIN = "start_grand_admin"
 CALLBACK_SELECT_TYPE = "^(?:complain|suggest|praise|else)$"
 CALLBACK_WANTS_REPLY = "^(?:yes|no|prev_menu)$"
 CALLBACK_REPLY_FEEDBACK = "reply_to_feedback-*"
-CALLBACK_MY_FEEDBACKS = "^(?:start_feedbacks|feedback_scroll_left|feedback_scroll_right)$"
+CALLBACK_MY_FEEDBACKS = (
+    "^(?:start_feedbacks|feedback_scroll_left|feedback_scroll_right)$"
+)
 CALLBACK_MY_HISTORY = "^(?:start_history|history_scroll_left|history_scroll_right)$"
 CALLBACK_WELCOME_EDIT = "welcome_edit-*"
 CALLBACK_DELETE = "edit_welcome_delete-*"

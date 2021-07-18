@@ -75,7 +75,8 @@ def start(update: Update, context: CallbackContext) -> int:
             context.user_data["welcome_name"] = welcome.name
 
             update.message.reply_text(
-                STR_WELCOME_TEXT.format(name=welcome.name, message=welcome.message), reply_markup=markup
+                STR_WELCOME_TEXT.format(name=welcome.name, message=welcome.message),
+                reply_markup=markup,
             )
 
             return SELECT_TYPE
@@ -90,16 +91,16 @@ def start(update: Update, context: CallbackContext) -> int:
     if FeedbackMethods.is_admin(SessionLocal(), update.message.chat_id):
         kb.append(
             [
-                InlineKeyboardButton(STR_START_CREATE_WELCOME, callback_data="start_create"),
-                InlineKeyboardButton(STR_START_ME_WELCOMES, callback_data="start_feedbacks"),
+                InlineKeyboardButton(
+                    STR_START_CREATE_WELCOME, callback_data="start_create"
+                ),
+                InlineKeyboardButton(
+                    STR_START_ME_WELCOMES, callback_data="start_feedbacks"
+                ),
             ]
         )
         kb.append(
-            [
-                InlineKeyboardButton(
-                    STR_SHARE_ADMIN, callback_data="start_grand_admin"
-                )
-            ]
+            [InlineKeyboardButton(STR_SHARE_ADMIN, callback_data="start_grand_admin")]
         )
     markup = InlineKeyboardMarkup(kb)
 
@@ -147,7 +148,9 @@ def grant_admin(update: Update, context: CallbackContext):
     is_admin = FeedbackMethods.is_admin(SessionLocal(), msg.chat_id)
     if is_admin:
         token = FeedbackMethods.create_token(SessionLocal())
-        msg.reply_text(STR_YOUR_TOKEN.format(token=create_deeplink(context.bot.username, token)))
+        msg.reply_text(
+            STR_YOUR_TOKEN.format(token=create_deeplink(context.bot.username, token))
+        )
 
 
 # pls, do not delete stuff below
@@ -177,15 +180,15 @@ def main():
 
     dp = updater.dispatcher
 
-    dp.add_handler(CallbackQueryHandler(grant_admin, pattern=fr"{CALLBACK_GRANT_ADMIN}"))
+    dp.add_handler(
+        CallbackQueryHandler(grant_admin, pattern=fr"{CALLBACK_GRANT_ADMIN}")
+    )
 
     feedback = ConversationHandler(
         entry_points=[CommandHandler(CMD_START, start)],
         states={
             SELECT_TYPE: [
-                CallbackQueryHandler(
-                    select_type, pattern=fr"{CALLBACK_SELECT_TYPE}"
-                )
+                CallbackQueryHandler(select_type, pattern=fr"{CALLBACK_SELECT_TYPE}")
             ],
             FEEDBACK: [
                 MessageHandler(
@@ -198,7 +201,10 @@ def main():
                 CallbackQueryHandler(wants_reply, pattern=fr"{CALLBACK_WANTS_REPLY}")
             ],
         },
-        fallbacks=[CommandHandler(CMD_CANCEL, cancel), CommandHandler(CMD_START, start)],
+        fallbacks=[
+            CommandHandler(CMD_CANCEL, cancel),
+            CommandHandler(CMD_START, start),
+        ],
         per_chat=True,
     )
 
@@ -214,7 +220,10 @@ def main():
                 MessageHandler(Filters.text & ~Filters.command, reply_message)
             ]
         },
-        fallbacks=[CommandHandler(CMD_CANCEL, cancel), CommandHandler(CMD_START, start)],
+        fallbacks=[
+            CommandHandler(CMD_CANCEL, cancel),
+            CommandHandler(CMD_START, start),
+        ],
         per_chat=True,
     )
     dp.add_handler(reply)
@@ -233,7 +242,9 @@ def main():
         )
     )
 
-    dp.add_handler(CallbackQueryHandler(welcome_edit, pattern=fr"{CALLBACK_WELCOME_EDIT}"))
+    dp.add_handler(
+        CallbackQueryHandler(welcome_edit, pattern=fr"{CALLBACK_WELCOME_EDIT}")
+    )
 
     dp.add_handler(
         CallbackQueryHandler(edit_welcome_back, pattern=fr"{CALLBACK_WELCOME_BACK}")
@@ -289,9 +300,7 @@ def main():
     dp.add_handler(
         ConversationHandler(
             entry_points=[
-                CallbackQueryHandler(
-                    delete_welcome_ask, pattern=fr"{CALLBACK_DELETE}"
-                )
+                CallbackQueryHandler(delete_welcome_ask, pattern=fr"{CALLBACK_DELETE}")
             ],
             states={
                 0: [
@@ -310,15 +319,22 @@ def main():
     )
 
     create = ConversationHandler(
-        entry_points=[CallbackQueryHandler(create_feedback, pattern=fr"{CALLBACK_CREATE}")],
+        entry_points=[
+            CallbackQueryHandler(create_feedback, pattern=fr"{CALLBACK_CREATE}")
+        ],
         states={
             CHOOSE_NAME: [MessageHandler(Filters.text & ~Filters.command, choose_name)],
             CREATE_WELCOME: [
                 MessageHandler(Filters.text & ~Filters.command, create_welcome),
-                CallbackQueryHandler(create_feedback_back, pattern=fr"{CALLBACK_CREATE_BACK}"),
+                CallbackQueryHandler(
+                    create_feedback_back, pattern=fr"{CALLBACK_CREATE_BACK}"
+                ),
             ],
         },
-        fallbacks=[CommandHandler(CMD_CANCEL, cancel), CommandHandler(CMD_START, start)],
+        fallbacks=[
+            CommandHandler(CMD_CANCEL, cancel),
+            CommandHandler(CMD_START, start),
+        ],
         per_chat=True,
     )
 

@@ -79,7 +79,11 @@ def create_welcome(update: Update, context: CallbackContext) -> int:
         return ConversationHandler.END
 
     update.message.reply_photo(
-        caption=STR_WELCOME_OVERVIEW.format(name=name, message=welcome_txt, link=create_deeplink(context.bot.username, name)),
+        caption=STR_WELCOME_OVERVIEW.format(
+            name=name,
+            message=welcome_txt,
+            link=create_deeplink(context.bot.username, name),
+        ),
         photo=open(url, "rb"),
     )
 
@@ -125,8 +129,12 @@ def my_feedbacks(update: Update, context: CallbackContext):
     kb = [
         [
             InlineKeyboardButton(STR_ARROW_LEFT, callback_data=CALLBACK_FEEDBACK_LEFT),
-            InlineKeyboardButton(STR_WELCOME_EDIT, callback_data=f"welcome_edit-{welcome_id}"),
-            InlineKeyboardButton(STR_ARROW_RIGHT, callback_data=CALLBACK_FEEDBACK_RIGHT),
+            InlineKeyboardButton(
+                STR_WELCOME_EDIT, callback_data=f"welcome_edit-{welcome_id}"
+            ),
+            InlineKeyboardButton(
+                STR_ARROW_RIGHT, callback_data=CALLBACK_FEEDBACK_RIGHT
+            ),
         ],
         [
             InlineKeyboardButton(
@@ -142,7 +150,11 @@ def my_feedbacks(update: Update, context: CallbackContext):
     code_generator.generate_qr_code(
         create_deeplink(context.bot.username, welcome.name), code_url
     )
-    caption = (STR_WELCOME_OVERVIEW.format(name=welcome.name, message=welcome.message, link=create_deeplink(context.bot.username, welcome.name)))
+    caption = STR_WELCOME_OVERVIEW.format(
+        name=welcome.name,
+        message=welcome.message,
+        link=create_deeplink(context.bot.username, welcome.name),
+    )
 
     try:
         msg.edit_media(
@@ -302,6 +314,9 @@ def reply_message(update: Update, context: CallbackContext):
         SessionLocal(), context.user_data["current_reply_feedback_id"]
     )
 
-    update.message.bot.send_message(feedback.from_user_id, STR_FEEDBACK_REPLY.format(name=feedback.welcome_message.name, message=msg))
+    update.message.bot.send_message(
+        feedback.from_user_id,
+        STR_FEEDBACK_REPLY.format(name=feedback.welcome_message.name, message=msg),
+    )
 
     return ConversationHandler.END
