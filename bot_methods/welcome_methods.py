@@ -8,6 +8,8 @@ from telegram.ext import CallbackContext, ConversationHandler
 import code_generator
 from FeedbackMethods import FeedbackMethods
 from database import SessionLocal
+from commands import *
+from deeplink_generator import create_deeplink
 
 CHOOSE_NAME, CREATE_WELCOME = range(2)
 REPLY_TO_FEEDBACK = 0
@@ -48,7 +50,7 @@ def choose_name(update: Update, context: CallbackContext) -> int:
 
     markup = InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton("⬅️ Назад", callback_data="create_back")],
+            [InlineKeyboardButton("⬅️ Назад", callback_data=CALLBACK_CREATE_BACK)],
         ]
     )
 
@@ -79,7 +81,7 @@ def create_welcome(update: Update, context: CallbackContext) -> int:
     update.message.reply_photo(
         caption=f"Название опроса: {name}\n\n"
         + "ссылочку откройте молодой человек"
-        + f"\n{f'https://t.me/{update.message.bot.username}?start={name}'}",
+        + f"\n{create_deeplink(context.bot.username, name)}",
         photo=open(url, "rb"),
     )
 
@@ -124,9 +126,9 @@ def my_feedbacks(update: Update, context: CallbackContext):
 
     kb = [
         [
-            InlineKeyboardButton("⬅️", callback_data="feedback_scroll_left"),
+            InlineKeyboardButton("⬅️", callback_data=CALLBACK_FEEDBACK_LEFT),
             InlineKeyboardButton("Edit", callback_data=f"welcome_edit-{welcome_id}"),
-            InlineKeyboardButton("➡️️", callback_data="feedback_scroll_right"),
+            InlineKeyboardButton("➡️️", callback_data=CALLBACK_FEEDBACK_RIGHT),
         ],
         [
             InlineKeyboardButton(
@@ -140,14 +142,14 @@ def my_feedbacks(update: Update, context: CallbackContext):
     bot_name = update.callback_query.message.bot.username
     code_url = f"codes/{welcome.name}.png"
     code_generator.generate_qr_code(
-        f"https://t.me/{bot_name}?start={welcome.name.lower()}", code_url
+        create_deeplink(context.bot.username, welcome.name), code_url
     )
     caption = (
         welcome.name
         + "\n"
         + welcome.message
         + f"\n\n{welcome_id}"
-        + f"\n\n{f'https://t.me/{msg.bot.username}?start={welcome.name}'}"
+        + f"\n\n{create_deeplink(context.bot.username, welcome.name)}"
     )
 
     try:
@@ -183,7 +185,7 @@ def welcome_edit(update: Update, context: CallbackContext):
                 callback_data=f"edit_welcome_description-{welcome_id}",
             )
         ],
-        [InlineKeyboardButton("<- back", callback_data=f"edit_welcome_back")],
+        [InlineKeyboardButton("<- back", callback_data=CALLBACK_WELCOME_BACK)],
     ]
 
     markup = InlineKeyboardMarkup(kb)
@@ -205,7 +207,7 @@ def welcome_edit_desc(update: Update, context: CallbackContext):
     msg = update.callback_query.message
 
     markup = InlineKeyboardMarkup(
-        [[InlineKeyboardButton("back", callback_data="edit_welcome_back")]]
+        [[InlineKeyboardButton("back", callback_data=CALLBACK_WELCOME_BACK)]]
     )
 
     msg.edit_text("новый дескрипшн:", reply_markup=markup)
@@ -217,7 +219,7 @@ def welcome_edit_title(update: Update, context: CallbackContext):
     msg = update.callback_query.message
 
     markup = InlineKeyboardMarkup(
-        [[InlineKeyboardButton("back", callback_data="edit_welcome_back")]]
+        [[InlineKeyboardButton("back", callback_data=CALLBACK_WELCOME_BACK)]]
     )
 
     msg.edit_text("новый тайтл:", reply_markup=markup)
@@ -274,8 +276,8 @@ def delete_welcome_ask(update: Update, context: CallbackContext):
     markup = InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton("No", callback_data="no"),
-                InlineKeyboardButton("Yes", callback_data="yes"),
+                InlineKeyboardButton("No", callback_data=CALLBACK_YES),
+                InlineKeyboardButton("Yes", callback_data=CALLBACK_NO),
             ],
             # [InlineKeyboardButton("back", callback_data="edit_welcome_back")]
         ]
