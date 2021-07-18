@@ -107,17 +107,18 @@ def my_feedbacks(update: Update, context: CallbackContext):
     else:
         if data == CALLBACK_FEEDBACK_LEFT:
             context.user_data["current_feedback_scroll_id"] -= 1
-            if context.user_data["current_feedback_scroll_id"] < 0:
-                context.user_data["current_feedback_scroll_id"] = (
-                    len(context.user_data["feedback_scroll_ids"]) - 1
-                )
         if data == CALLBACK_FEEDBACK_RIGHT:
             context.user_data["current_feedback_scroll_id"] += 1
-            if (
-                len(context.user_data["feedback_scroll_ids"])
-                <= context.user_data["current_feedback_scroll_id"]
-            ):
-                context.user_data["current_feedback_scroll_id"] = 0
+
+        if (
+            len(context.user_data["feedback_scroll_ids"])
+            <= context.user_data["current_feedback_scroll_id"]
+        ):
+            context.user_data["current_feedback_scroll_id"] = 0
+        if context.user_data["current_feedback_scroll_id"] < 0:
+            context.user_data["current_feedback_scroll_id"] = (
+                len(context.user_data["feedback_scroll_ids"]) - 1
+            )
 
     current_id = context.user_data["current_feedback_scroll_id"]
     msg = update.callback_query.message
@@ -361,17 +362,17 @@ def welcome_feedbacks(update: Update, context: CallbackContext):
     else:
         if data == CALLBACK_HISTORY_FEED_LEFT:
             context.user_data["current_history_feed_scroll_id"] -= 1
-            if context.user_data["current_history_feed_scroll_id"] < 0:
-                context.user_data["current_history_feed_scroll_id"] = (
-                    len(context.user_data["history_scroll_ids"]) - 1
-                )
         if data == CALLBACK_HISTORY_FEED_RIGHT:
             context.user_data["current_history_feed_scroll_id"] += 1
-            if (
-                len(context.user_data["history_feedbacks_scroll_ids"])
-                <= context.user_data["current_history_feed_scroll_id"]
-            ):
-                context.user_data["current_history_feed_scroll_id"] = 0
+        if (
+            len(context.user_data["history_feedbacks_scroll_ids"])
+            <= context.user_data["current_history_feed_scroll_id"]
+        ):
+            context.user_data["current_history_feed_scroll_id"] = 0
+        if context.user_data["current_history_feed_scroll_id"] < 0:
+            context.user_data["current_history_feed_scroll_id"] = (
+                    len(context.user_data["history_scroll_ids"]) - 1
+            )
 
     current_id = context.user_data["current_history_feed_scroll_id"]
 

@@ -120,17 +120,19 @@ def my_history(update: Update, context: CallbackContext):
     else:
         if data == "history_scroll_left":
             context.user_data["current_history_scroll_id"] -= 1
-            if context.user_data["current_history_scroll_id"] < 0:
-                context.user_data["current_history_scroll_id"] = (
-                    len(context.user_data["history_scroll_ids"]) - 1
-                )
         if data == "history_scroll_right":
             context.user_data["current_history_scroll_id"] += 1
-            if (
-                len(context.user_data["history_scroll_ids"])
-                <= context.user_data["current_history_scroll_id"]
-            ):
-                context.user_data["current_history_scroll_id"] = 0
+
+        if context.user_data["current_history_scroll_id"] < 0:
+            context.user_data["current_history_scroll_id"] = (
+                len(context.user_data["history_scroll_ids"]) - 1
+            )
+
+        if (
+            len(context.user_data["history_scroll_ids"])
+            <= context.user_data["current_history_scroll_id"]
+        ):
+            context.user_data["current_history_scroll_id"] = 0
 
     current_id = context.user_data["current_history_scroll_id"]
 
