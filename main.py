@@ -153,6 +153,10 @@ def grant_admin(update: Update, context: CallbackContext):
         )
 
 
+def error_shit(update: Update, context: CallbackContext):
+    return help(update, context)
+
+
 # pls, do not delete stuff below
 # noinspection PyTypeChecker
 def main():
@@ -340,6 +344,8 @@ def main():
 
     dp.add_handler(create)
     dp.add_handler(feedback)
+
+    dp.add_handler(MessageHandler(Filters.text, error_shit))
 
     updater.start_polling()
     updater.idle()
