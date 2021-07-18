@@ -23,6 +23,11 @@ STR_FEEDBACK_SUGGEST = "suggest"
 STR_FEEDBACK_PRAISE = "praise"
 STR_FEEDBACK_ELSE = "else"
 
+STR_FEEDBACK_COMPLAIN_D = "жалуйся"
+STR_FEEDBACK_SUGGEST_D = "предлагай"
+STR_FEEDBACK_PRAISE_D = "хвали"
+STR_FEEDBACK_ELSE_D = "еще чо то"
+
 STR_WELCOME_TEXT = """
 Опрос: {name}
 
@@ -74,4 +79,18 @@ STR_WELCOME_DELETE = "delete"
 STR_FEEDBACK_REPLY = """
 Вам ответили по вашему обращению по опросу: {name}
 {message}
+"""
+
+STR_HISTORY_ITEM = """
+Опрос: {name}
+Сообщение: {message}
+"""
+STR_NO_FEEDBACKS = "Вы пока не ответили ни н аодин опрос"
+STR_REPLY_TO_FEEDBACK = "Ответить"
+STR_WANTS_REPLY = "Хочешь чтобы ответили?"
+STR_FORWARD = "Мы вам ответим быстро"
+STR_THANKS_FOR_FEEDBACK = "Спс за отзыв чел"
+STR_NEW_FEEDBACK = """
+У вас новое обращение по опросу: {name}
+Сообщение: {message}
 """

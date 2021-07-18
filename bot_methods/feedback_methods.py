@@ -6,7 +6,7 @@ from telegram.ext import CallbackContext, ConversationHandler
 
 from FeedbackMethods import FeedbackMethods
 from database import SessionLocal
-from commands import *
+from texts import *
 
 SELECT_TYPE, FEEDBACK, WANTS_REPLY = range(3)
 
@@ -16,15 +16,15 @@ def select_type(update: Update, context: CallbackContext):
     type = update.callback_query.data
 
     if type == "complain":
-        msg.edit_text("STR_REPLY_COMPLAIN")
+        msg.edit_text(STR_FEEDBACK_COMPLAIN_D)
     elif type == "praise":
-        msg.edit_text("STR_REPLY_COMPLAIN")
+        msg.edit_text(STR_FEEDBACK_PRAISE_D)
     elif type == "suggest":
-        msg.edit_text("STR_REPLY_COMPLAIN")
+        msg.edit_text(STR_FEEDBACK_SUGGEST_D)
     elif type == "else":
-        msg.edit_text("STR_REPLY_COMPLAIN")
+        msg.edit_text(STR_FEEDBACK_ELSE_D)
     else:
-        msg.edit_text("STR_REPLY_COMPLAIN")
+        msg.edit_text(STR_ERROR)
         return ConversationHandler.END
 
     return FEEDBACK
@@ -40,15 +40,15 @@ def feedback_msg(update: Update, context: CallbackContext):
 
     keyboard = [
         [
-            InlineKeyboardButton("Да", callback_data=CALLBACK_YES),
-            InlineKeyboardButton("Нет", callback_data=CALLBACK_NO),
+            InlineKeyboardButton(STR_YES, callback_data=CALLBACK_YES),
+            InlineKeyboardButton(STR_NO, callback_data=CALLBACK_NO),
         ],
-        [InlineKeyboardButton("⬅️ Назад", callback_data=CALLBACK_PREV_MENU)],
+        [InlineKeyboardButton(STR_BACK, callback_data=CALLBACK_PREV_MENU)],
     ]
 
     markup = InlineKeyboardMarkup(keyboard)
 
-    update.message.reply_text("чо-то типа", reply_markup=markup)
+    update.message.reply_text(STR_WANTS_REPLY, reply_markup=markup)
 
     return WANTS_REPLY
 
@@ -61,9 +61,9 @@ def wants_reply(update: Update, context: CallbackContext):
         return select_type(update, context)
 
     if data == CALLBACK_YES:
-        msg.edit_text("STR_FORWARD_MESSAGE")
+        msg.edit_text(STR_FORWARD)
     else:
-        msg.edit_text("STR_THANKS_FOR_FEEDBACK")
+        msg.edit_text(STR_THANKS_FOR_FEEDBACK)
 
     context.user_data["reply_type"] = data
 
@@ -81,7 +81,7 @@ def wants_reply(update: Update, context: CallbackContext):
     kb = [
         [
             InlineKeyboardButton(
-                "Хуй пизда отзыв ответить",
+                STR_REPLY_TO_FEEDBACK,
                 callback_data=f"reply_to_feedback-{fb_msg.id}",
             )
         ]
@@ -89,7 +89,7 @@ def wants_reply(update: Update, context: CallbackContext):
 
     markup = InlineKeyboardMarkup(kb)
 
-    msg.bot.send_message(admin_id, "пиздец отзыв оставили", reply_markup=markup)
+    msg.bot.send_message(admin_id, STR_NEW_FEEDBACK.format(name=fb_msg.welcome_message.name, message=fb_msg.message), reply_markup=markup)
 
     return ConversationHandler.END
 
@@ -103,7 +103,7 @@ def my_history(update: Update, context: CallbackContext):
     ]
 
     if len(context.user_data["history_scroll_ids"]) == 0:
-        msg.reply_text("Пока опросом немае")
+        msg.reply_text(STR_NO_FEEDBACKS)
         return ConversationHandler.END
 
     if context.user_data.get("current_history_scroll_id") is None:
@@ -131,14 +131,14 @@ def my_history(update: Update, context: CallbackContext):
 
     kb = [
         [
-            InlineKeyboardButton("⬅️", callback_data=CALLBACK_HISTORY_LEFT),
-            InlineKeyboardButton("➡️️", callback_data=CALLBACK_HISTORY_RIGHT),
+            InlineKeyboardButton(STR_ARROW_LEFT, callback_data=CALLBACK_HISTORY_LEFT),
+            InlineKeyboardButton(STR_ARROW_RIGHT, callback_data=CALLBACK_HISTORY_RIGHT),
         ]
     ]
 
     markup = InlineKeyboardMarkup(kb)
 
-    text = f"{feedback.message} - {current_id}"
+    text = STR_HISTORY_ITEM.format(name=feedback.welcome_message.name, message=feedback.message)
 
     try:
         msg.edit_text(text, reply_markup=markup)
