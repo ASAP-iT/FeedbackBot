@@ -2,9 +2,9 @@
 # texts.py
 from commands import *
 
-STR_ADMIN_HELP = f"""Чтобы создать опрос используйте кнопку в меню /{START_CMD}\n\n
+STR_ADMIN_HELP = f"""Чтобы создать опрос используйте кнопку в меню /{CMD_START}\n\n
 Если у вас есть вопросы или предложения по работе бота, вы можете их отправить по \
-<a href="https://t.me/fefufeedbackbot?start=asapteam_feedback_bot">ссылке</a> \
+<a href="https://t.me/asap_feedback_bot?start=asapteam_feedback_bot">ссылке</a> \
 или написать в личные сообщения @mosenzova_iui\n\nСделано командой <a href="https://t.me/asapdvfu">ASAP❤️ </a>"""
 
 STR_USER_HELP = (
