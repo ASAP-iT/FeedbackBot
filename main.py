@@ -160,7 +160,6 @@ def error_shit(update: Update, context: CallbackContext):
 # pls, do not delete stuff below
 # noinspection PyTypeChecker
 def main():
-
     import os
     os.system("mkdir codes")
 
