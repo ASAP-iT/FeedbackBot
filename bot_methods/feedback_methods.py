@@ -1,7 +1,11 @@
 # feedback_methods.py
 # FeedbackBot
 # Created by romanesin on 18.07.2021
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import CallbackContext, ConversationHandler
 
+from FeedbackMethods import FeedbackMethods
+from database import SessionLocal
 
 SELECT_TYPE, FEEDBACK, WANTS_REPLY = range(3)
 
