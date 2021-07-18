@@ -31,7 +31,8 @@ from bot_methods.welcome_methods import (
     choose_name,
     create_welcome,
     create_feedback_back,
-    my_feedbacks, welcome_feedbacks,
+    my_feedbacks,
+    welcome_feedbacks,
 )
 from deeplink_generator import create_deeplink
 from texts import *
@@ -253,7 +254,9 @@ def main():
     )
 
     dp.add_handler(
-        CallbackQueryHandler(welcome_feedbacks, pattern=fr"{CALLBACK_HISTORY_FEEDBACKS}")
+        CallbackQueryHandler(
+            welcome_feedbacks, pattern=fr"{CALLBACK_HISTORY_FEEDBACKS}"
+        )
     )
 
     dp.add_handler(

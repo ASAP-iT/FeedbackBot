@@ -147,7 +147,7 @@ def my_feedbacks(update: Update, context: CallbackContext):
             InlineKeyboardButton(
                 STR_WELCOME_DELETE, callback_data=f"edit_welcome_delete-{welcome_id}"
             ),
-        ]
+        ],
     ]
 
     markup = InlineKeyboardMarkup(kb)
@@ -341,7 +341,10 @@ def welcome_feedbacks(update: Update, context: CallbackContext):
         return ConversationHandler.END
 
     context.user_data["history_feedbacks_scroll_ids"] = [
-        x.id for x in FeedbackMethods.get_welcome_feedbacks(SessionLocal(), msg.chat_id, context.user_data["welcome_id_scroll"])
+        x.id
+        for x in FeedbackMethods.get_welcome_feedbacks(
+            SessionLocal(), msg.chat_id, context.user_data["welcome_id_scroll"]
+        )
     ]
 
     if len(context.user_data["history_feedbacks_scroll_ids"]) == 0:
@@ -355,13 +358,13 @@ def welcome_feedbacks(update: Update, context: CallbackContext):
             context.user_data["current_history_feed_scroll_id"] -= 1
             if context.user_data["current_history_feed_scroll_id"] < 0:
                 context.user_data["current_history_feed_scroll_id"] = (
-                        len(context.user_data["history_scroll_ids"]) - 1
+                    len(context.user_data["history_scroll_ids"]) - 1
                 )
         if data == CALLBACK_HISTORY_FEED_RIGHT:
             context.user_data["current_history_feed_scroll_id"] += 1
             if (
-                    len(context.user_data["history_feedbacks_scroll_ids"])
-                    <= context.user_data["current_history_feed_scroll_id"]
+                len(context.user_data["history_feedbacks_scroll_ids"])
+                <= context.user_data["current_history_feed_scroll_id"]
             ):
                 context.user_data["current_history_feed_scroll_id"] = 0
 
@@ -373,17 +376,23 @@ def welcome_feedbacks(update: Update, context: CallbackContext):
 
     kb = [
         [
-            InlineKeyboardButton(STR_ARROW_LEFT, callback_data=CALLBACK_HISTORY_FEED_LEFT),
-            InlineKeyboardButton(STR_ARROW_RIGHT, callback_data=CALLBACK_HISTORY_FEED_RIGHT),
+            InlineKeyboardButton(
+                STR_ARROW_LEFT, callback_data=CALLBACK_HISTORY_FEED_LEFT
+            ),
+            InlineKeyboardButton(
+                STR_ARROW_RIGHT, callback_data=CALLBACK_HISTORY_FEED_RIGHT
+            ),
         ],
-        [InlineKeyboardButton(STR_BACK, callback_data=CALLBACK_WELCOME_BACK)]
+        [InlineKeyboardButton(STR_BACK, callback_data=CALLBACK_WELCOME_BACK)],
     ]
 
     markup = InlineKeyboardMarkup(kb)
 
     if feedback.response is not None:
         text = STR_HISTORY_FEEDBACK_ITEM.format(
-            name=feedback.welcome_message.name, message=feedback.message, response=feedback.response
+            name=feedback.welcome_message.name,
+            message=feedback.message,
+            response=feedback.response,
         )
     else:
         text = STR_HISTORY_ITEM.format(

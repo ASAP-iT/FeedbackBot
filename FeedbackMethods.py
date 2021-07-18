@@ -312,11 +312,13 @@ class FeedbackMethods:
         )
 
     @staticmethod
-    def get_welcome_feedbacks(db: Session, chat_id: int, welcome_id: int) -> List[FeedbackMessage]:
+    def get_welcome_feedbacks(
+        db: Session, chat_id: int, welcome_id: int
+    ) -> List[FeedbackMessage]:
         return (
             db.query(FeedbackMessage)
-                .filter(FeedbackMessage.welcome_message_id == welcome_id)
-                .all()
+            .filter(FeedbackMessage.welcome_message_id == welcome_id)
+            .all()
         )
 
     @staticmethod
