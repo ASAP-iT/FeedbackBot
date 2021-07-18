@@ -172,7 +172,10 @@ def my_feedbacks(update: Update, context: CallbackContext):
             reply_markup=markup,
         )
     except:
-        msg.delete()
+        try:
+            msg.delete()
+        except:
+            pass
         msg.reply_photo(
             open(welcome.code_url, "rb"), caption=caption, reply_markup=markup
         )
@@ -405,7 +408,10 @@ def welcome_feedbacks(update: Update, context: CallbackContext):
     try:
         msg.edit_text(text, reply_markup=markup)
     except:
-        msg.delete()
+        try:
+            msg.delete()
+        except:
+            pass
         msg.reply_text(text, reply_markup=markup)
 
     return ConversationHandler.END

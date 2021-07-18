@@ -157,7 +157,10 @@ def my_history(update: Update, context: CallbackContext):
     try:
         msg.edit_text(text, reply_markup=markup)
     except:
-        msg.delete()
+        try:
+            msg.delete()
+        except:
+            pass
         msg.reply_text(text, reply_markup=markup)
 
     return ConversationHandler.END
