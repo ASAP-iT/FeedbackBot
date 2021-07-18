@@ -179,14 +179,14 @@ def main():
 
     dp = updater.dispatcher
 
-    dp.add_handler(CallbackQueryHandler(grant_admin, pattern=r"start_grand_admin"))
+    dp.add_handler(CallbackQueryHandler(grant_admin, pattern=fr"{CALLBACK_GRANT_ADMIN}"))
 
     feedback = ConversationHandler(
-        entry_points=[CommandHandler("start", start)],
+        entry_points=[CommandHandler(CMD_START, start)],
         states={
             SELECT_TYPE: [
                 CallbackQueryHandler(
-                    select_type, pattern=r"^(?:complain|suggest|praise|else)$"
+                    select_type, pattern=fr"{CALLBACK_SELECT_TYPE}"
                 )
             ],
             FEEDBACK: [
@@ -197,26 +197,26 @@ def main():
                 )
             ],
             WANTS_REPLY: [
-                CallbackQueryHandler(wants_reply, pattern=r"^(?:yes|no|prev_menu)$")
+                CallbackQueryHandler(wants_reply, pattern=fr"{CALLBACK_WANTS_REPLY}")
             ],
         },
-        fallbacks=[CommandHandler("cancel", cancel), CommandHandler("start", start)],
+        fallbacks=[CommandHandler(CMD_CANCEL, cancel), CommandHandler(CMD_START, start)],
         per_chat=True,
     )
 
-    dp.add_handler(CallbackQueryHandler(help, pattern=r"start_help"))
-    dp.add_handler(CommandHandler("help", help))
+    dp.add_handler(CallbackQueryHandler(help, pattern=fr"{CALLBACK_HELP}"))
+    dp.add_handler(CommandHandler(CMD_HELP, help))
 
     reply = ConversationHandler(
         entry_points=[
-            CallbackQueryHandler(reply_feedback, pattern=r"reply_to_feedback-*")
+            CallbackQueryHandler(reply_feedback, pattern=fr"{CALLBACK_REPLY_FEEDBACK}")
         ],
         states={
             REPLY_TO_FEEDBACK: [
                 MessageHandler(Filters.text & ~Filters.command, reply_message)
             ]
         },
-        fallbacks=[CommandHandler("cancel", cancel), CommandHandler("start", start)],
+        fallbacks=[CommandHandler(CMD_CANCEL, cancel), CommandHandler(CMD_START, start)],
         per_chat=True,
     )
     dp.add_handler(reply)
@@ -224,41 +224,41 @@ def main():
     dp.add_handler(
         CallbackQueryHandler(
             my_feedbacks,
-            pattern=r"^(?:start_feedbacks|feedback_scroll_left|feedback_scroll_right)$",
+            pattern=fr"{CALLBACK_MY_FEEDBACKS}",
         )
     )
 
     dp.add_handler(
         CallbackQueryHandler(
             my_history,
-            pattern=r"^(?:start_history|history_scroll_left|history_scroll_right)$",
+            pattern=fr"{CALLBACK_MY_HISTORY}",
         )
     )
 
-    dp.add_handler(CallbackQueryHandler(welcome_edit, pattern=r"welcome_edit-*"))
+    dp.add_handler(CallbackQueryHandler(welcome_edit, pattern=fr"{CALLBACK_WELCOME_EDIT}"))
 
     dp.add_handler(
-        CallbackQueryHandler(edit_welcome_back, pattern=r"edit_welcome_back")
+        CallbackQueryHandler(edit_welcome_back, pattern=fr"{CALLBACK_WELCOME_BACK}")
     )
 
     dp.add_handler(
         ConversationHandler(
             entry_points=[
                 CallbackQueryHandler(
-                    welcome_edit_title, pattern=r"edit_welcome_title-*"
+                    welcome_edit_title, pattern=fr"{CALLBACK_EDIT_WELCOME_TITLE}"
                 )
             ],
             states={
                 0: [
                     MessageHandler(Filters.text & ~Filters.command, new_title),
                     CallbackQueryHandler(
-                        edit_welcome_back, pattern=r"edit_welcome_back"
+                        edit_welcome_back, pattern=fr"{CALLBACK_WELCOME_BACK}"
                     ),
                 ]
             },
             fallbacks=[
-                CommandHandler("cancel", cancel),
-                CommandHandler("start", start),
+                CommandHandler(CMD_CANCEL, cancel),
+                CommandHandler(CMD_START, start),
             ],
             per_chat=True,
         )
@@ -268,20 +268,20 @@ def main():
         ConversationHandler(
             entry_points=[
                 CallbackQueryHandler(
-                    welcome_edit_desc, pattern=r"edit_welcome_description-*"
+                    welcome_edit_desc, pattern=fr"{CALLBACK_EDIT_WELCOME_DESCRIPTION}"
                 )
             ],
             states={
                 0: [
                     MessageHandler(Filters.text & ~Filters.command, new_description),
                     CallbackQueryHandler(
-                        edit_welcome_back, pattern=r"edit_welcome_back"
+                        edit_welcome_back, pattern=fr"{CALLBACK_WELCOME_BACK}"
                     ),
                 ]
             },
             fallbacks=[
-                CommandHandler("cancel", cancel),
-                CommandHandler("start", start),
+                CommandHandler(CMD_CANCEL, cancel),
+                CommandHandler(CMD_START, start),
             ],
             per_chat=True,
         )
@@ -292,35 +292,35 @@ def main():
         ConversationHandler(
             entry_points=[
                 CallbackQueryHandler(
-                    delete_welcome_ask, pattern=r"edit_welcome_delete-*"
+                    delete_welcome_ask, pattern=fr"{CALLBACK_DELETE}"
                 )
             ],
             states={
                 0: [
-                    CallbackQueryHandler(delete_welcome, pattern=r"yes"),
+                    CallbackQueryHandler(delete_welcome, pattern=fr"{CALLBACK_YES}"),
                     CallbackQueryHandler(
-                        edit_welcome_back, pattern=r"^(?:no|edit_welcome_back)$"
+                        edit_welcome_back, pattern=fr"{CALLBACK_WELCOME_BACK_NO}"
                     ),
                 ]
             },
             fallbacks=[
-                CommandHandler("cancel", cancel),
-                CommandHandler("start", start),
+                CommandHandler(CMD_CANCEL, cancel),
+                CommandHandler(CMD_START, start),
             ],
             per_chat=True,
         )
     )
 
     create = ConversationHandler(
-        entry_points=[CallbackQueryHandler(create_feedback, pattern=r"start_create")],
+        entry_points=[CallbackQueryHandler(create_feedback, pattern=fr"{CALLBACK_CREATE}")],
         states={
             CHOOSE_NAME: [MessageHandler(Filters.text & ~Filters.command, choose_name)],
             CREATE_WELCOME: [
                 MessageHandler(Filters.text & ~Filters.command, create_welcome),
-                CallbackQueryHandler(create_feedback_back, pattern=r"create_back"),
+                CallbackQueryHandler(create_feedback_back, pattern=fr"{CALLBACK_CREATE_BACK}"),
             ],
         },
-        fallbacks=[CommandHandler("cancel", cancel), CommandHandler("start", start)],
+        fallbacks=[CommandHandler(CMD_CANCEL, cancel), CommandHandler(CMD_START, start)],
         per_chat=True,
     )
 
