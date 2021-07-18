@@ -11,21 +11,21 @@ pipeline {
                 branch "main"
             }
 
-            withCredentials([file(credentialsId: 'feedback_bot', variable: 'feedback_bot')]) {
-               sh "cp \$feedback_bot feedback-bot.env"
-               sh "cp \$feedback_bot feedback-bot.env"
-            }
-
             steps {
-                echo "Deploying and Building..."
-                sh "sendNotification '#Feedback_Bot 🛠 Building New Container #${BUILD_NUMBER}'"
-                sh "docker-compose build"
-                sh "sendNotification '#Feedback_Bot ⛔️️ Stopping Previous Container #${BUILD_NUMBER}'"
-                echo "Stopping previous container..."
-                sh "docker-compose down"
-                sh "sendNotification '#Feedback_Bot 🐳 Upping New Container #${BUILD_NUMBER}'"
-                sh "docker-compose up -d"
-                echo "Deployed!"
+                withCredentials([file(credentialsId: 'feedback_bot', variable: 'feedback_bot')]) {
+                    sh "cp \$feedback_bot feedback-bot.env"
+                    sh "cp \$feedback_bot feedback-bot.env"
+
+                    echo "Deploying and Building..."
+                    sh "sendNotification '#Feedback_Bot 🛠 Building New Container #${BUILD_NUMBER}'"
+                    sh "docker-compose build"
+                    sh "sendNotification '#Feedback_Bot ⛔️️ Stopping Previous Container #${BUILD_NUMBER}'"
+                    echo "Stopping previous container..."
+                    sh "docker-compose down"
+                    sh "sendNotification '#Feedback_Bot 🐳 Upping New Container #${BUILD_NUMBER}'"
+                    sh "docker-compose up -d"
+                    echo "Deployed!"
+                }
             }
         }
 
@@ -34,21 +34,21 @@ pipeline {
                 branch "dev"
             }
 
-            withCredentials([file(credentialsId: 'feedback_bot', variable: 'feedback_bot')]) {
-               sh "cp \$feedback_bot feedback-bot.env"
-               sh "cp \$feedback_bot feedback-bot.env"
-            }
-
             steps {
-                echo "Deploying and Building..."
-                sh "sendNotification '#Feedback_Bot_Dev 🛠 Building New Container #${BUILD_NUMBER}'"
-                sh "docker-compose -f docker-compose-dev.yml build"
-                sh "sendNotification '#Feedback_Bot_Dev ⛔️️ Stopping Previous Container #${BUILD_NUMBER}'"
-                echo "Stopping previous container..."
-                sh "docker-compose -f docker-compose-dev.yml down"
-                sh "sendNotification '#Feedback_Bot_Dev 🐳 Upping New Container #${BUILD_NUMBER}'"
-                sh "docker-compose -f docker-compose-dev.yml up -d"
-                echo "Deployed!"
+                withCredentials([file(credentialsId: 'feedback_bot', variable: 'feedback_bot')]) {
+                    sh "cp \$feedback_bot feedback-bot.env"
+                    sh "cp \$feedback_bot feedback-bot.env"
+
+                    echo "Deploying and Building..."
+                    sh "sendNotification '#Feedback_Bot_Dev 🛠 Building New Container #${BUILD_NUMBER}'"
+                    sh "docker-compose -f docker-compose-dev.yml build"
+                    sh "sendNotification '#Feedback_Bot_Dev ⛔️️ Stopping Previous Container #${BUILD_NUMBER}'"
+                    echo "Stopping previous container..."
+                    sh "docker-compose -f docker-compose-dev.yml down"
+                    sh "sendNotification '#Feedback_Bot_Dev 🐳 Upping New Container #${BUILD_NUMBER}'"
+                    sh "docker-compose -f docker-compose-dev.yml up -d"
+                    echo "Deployed!"
+                }
             }
         }
     }
