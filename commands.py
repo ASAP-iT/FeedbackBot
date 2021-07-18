@@ -29,3 +29,8 @@ CALLBACK_FEEDBACK_LEFT = "feedback_scroll_left"
 CALLBACK_FEEDBACK_RIGHT = "feedback_scroll_right"
 CALLBACK_HISTORY_LEFT = "history_scroll_left"
 CALLBACK_HISTORY_RIGHT = "history_scroll_right"
+CALLBACK_HISTORY_FEEDBACKS = (
+    "^(?:his_feedbacks|his_feedbacks_left|his_feedbacks_right)$"
+)
+CALLBACK_HISTORY_FEED_LEFT = "his_feedbacks_left"
+CALLBACK_HISTORY_FEED_RIGHT = "his_feedbacks_right"

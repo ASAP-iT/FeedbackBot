@@ -105,13 +105,13 @@ def my_feedbacks(update: Update, context: CallbackContext):
     if context.user_data.get("current_feedback_scroll_id") is None:
         context.user_data["current_feedback_scroll_id"] = 0
     else:
-        if data == "feedback_scroll_left":
+        if data == CALLBACK_FEEDBACK_LEFT:
             context.user_data["current_feedback_scroll_id"] -= 1
             if context.user_data["current_feedback_scroll_id"] < 0:
                 context.user_data["current_feedback_scroll_id"] = (
                     len(context.user_data["feedback_scroll_ids"]) - 1
                 )
-        if data == "feedback_scroll_right":
+        if data == CALLBACK_FEEDBACK_RIGHT:
             context.user_data["current_feedback_scroll_id"] += 1
             if (
                 len(context.user_data["feedback_scroll_ids"])
@@ -126,6 +126,8 @@ def my_feedbacks(update: Update, context: CallbackContext):
 
     welcome = FeedbackMethods.get_welcome_by_id(SessionLocal(), welcome_id)
 
+    context.user_data["welcome_id_scroll"] = welcome.id
+
     kb = [
         [
             InlineKeyboardButton(STR_ARROW_LEFT, callback_data=CALLBACK_FEEDBACK_LEFT),
@@ -138,8 +140,13 @@ def my_feedbacks(update: Update, context: CallbackContext):
         ],
         [
             InlineKeyboardButton(
+                STR_WELCOME_SHOW_FEEDBACKS, callback_data=f"his_feedbacks"
+            ),
+        ],
+        [
+            InlineKeyboardButton(
                 STR_WELCOME_DELETE, callback_data=f"edit_welcome_delete-{welcome_id}"
-            )
+            ),
         ],
     ]
 
@@ -156,13 +163,19 @@ def my_feedbacks(update: Update, context: CallbackContext):
         link=create_deeplink(context.bot.username, welcome.name),
     )
 
+    if len(context.user_data["feedback_scroll_ids"]) == 0:
+        return ConversationHandler.END
+
     try:
         msg.edit_media(
             media=InputMediaPhoto(media=open(code_url, "rb"), caption=caption),
             reply_markup=markup,
         )
     except:
-        msg.delete()
+        try:
+            msg.delete()
+        except:
+            pass
         msg.reply_photo(
             open(welcome.code_url, "rb"), caption=caption, reply_markup=markup
         )
@@ -293,7 +306,7 @@ def delete_welcome_ask(update: Update, context: CallbackContext):
 
 
 def reply_feedback(update: Update, context: CallbackContext):
-    update.callback_query.message.reply_text("Ответьте на хуй:")
+    update.callback_query.message.reply_text("Напишите ответ:")
     context.user_data["current_reply_msg_id"] = update.callback_query.message.message_id
     context.user_data["current_reply_feedback_id"] = int(
         update.callback_query.data.split("-")[1]
@@ -318,5 +331,87 @@ def reply_message(update: Update, context: CallbackContext):
         feedback.from_user_id,
         STR_FEEDBACK_REPLY.format(name=feedback.welcome_message.name, message=msg),
     )
+
+    return ConversationHandler.END
+
+
+def welcome_feedbacks(update: Update, context: CallbackContext):
+    msg = update.callback_query.message
+    data = update.callback_query.data
+
+    if data == "back":
+        edit_welcome_back(update, context)
+        return ConversationHandler.END
+
+    context.user_data["history_feedbacks_scroll_ids"] = [
+        x.id
+        for x in FeedbackMethods.get_welcome_feedbacks(
+            SessionLocal(), msg.chat_id, context.user_data["welcome_id_scroll"]
+        )
+    ]
+
+    if len(context.user_data["history_feedbacks_scroll_ids"]) == 0:
+        msg.reply_text(STR_NO_FEEDBACKS)
+        return ConversationHandler.END
+
+    if context.user_data.get("current_history_feed_scroll_id") is None:
+        context.user_data["current_history_feed_scroll_id"] = 0
+    else:
+        if data == CALLBACK_HISTORY_FEED_LEFT:
+            context.user_data["current_history_feed_scroll_id"] -= 1
+            if context.user_data["current_history_feed_scroll_id"] < 0:
+                context.user_data["current_history_feed_scroll_id"] = (
+                    len(context.user_data["history_scroll_ids"]) - 1
+                )
+        if data == CALLBACK_HISTORY_FEED_RIGHT:
+            context.user_data["current_history_feed_scroll_id"] += 1
+            if (
+                len(context.user_data["history_feedbacks_scroll_ids"])
+                <= context.user_data["current_history_feed_scroll_id"]
+            ):
+                context.user_data["current_history_feed_scroll_id"] = 0
+
+    current_id = context.user_data["current_history_feed_scroll_id"]
+
+    feedback_id = context.user_data["history_feedbacks_scroll_ids"][current_id]
+
+    feedback = FeedbackMethods.get_feedback(SessionLocal(), feedback_id)
+
+    kb = [
+        [
+            InlineKeyboardButton(
+                STR_ARROW_LEFT, callback_data=CALLBACK_HISTORY_FEED_LEFT
+            ),
+            InlineKeyboardButton(
+                STR_ARROW_RIGHT, callback_data=CALLBACK_HISTORY_FEED_RIGHT
+            ),
+        ],
+        [InlineKeyboardButton(STR_BACK, callback_data=CALLBACK_WELCOME_BACK)],
+    ]
+
+    markup = InlineKeyboardMarkup(kb)
+
+    if feedback.response is not None:
+        text = STR_HISTORY_FEEDBACK_ITEM.format(
+            name=feedback.welcome_message.name,
+            message=feedback.message,
+            response=feedback.response,
+        )
+    else:
+        text = STR_HISTORY_ITEM.format(
+            name=feedback.welcome_message.name, message=feedback.message
+        )
+
+    if len(context.user_data["history_feedbacks_scroll_ids"]) == 0:
+        return ConversationHandler.END
+
+    try:
+        msg.edit_text(text, reply_markup=markup)
+    except:
+        try:
+            msg.delete()
+        except:
+            pass
+        msg.reply_text(text, reply_markup=markup)
 
     return ConversationHandler.END
