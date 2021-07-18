@@ -35,11 +35,11 @@ pipeline {
             }
 
             steps {
-                withCredentials([file(credentialsId: 'feedback_bottttt', variable: 'feedback_bot')]) {
-                    echo "${feedback_bot}"
+                withCredentials([file(credentialsId: 'feedback_bot', variable: 'feedback_env')]) {
+                    echo "${feedback_env}"
 
-                    sh "cp \$feedback_bot feedback-bot.env"
-                    sh "cp \$feedback_bot feedback-bot.env"
+                    sh "cp \$feedback_env feedback-bot.env"
+                    sh "cp \$feedback_env feedback-bot.env"
 
                     echo "Deploying and Building..."
                     sh "sendNotification '#Feedback_Bot_Dev 🛠 Building New Container #${BUILD_NUMBER}'"
