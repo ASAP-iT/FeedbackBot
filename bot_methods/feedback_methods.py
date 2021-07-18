@@ -6,6 +6,7 @@ from telegram.ext import CallbackContext, ConversationHandler
 
 from FeedbackMethods import FeedbackMethods
 from database import SessionLocal
+from commands import *
 
 SELECT_TYPE, FEEDBACK, WANTS_REPLY = range(3)
 
@@ -39,10 +40,10 @@ def feedback_msg(update: Update, context: CallbackContext):
 
     keyboard = [
         [
-            InlineKeyboardButton("Да", callback_data="yes"),
-            InlineKeyboardButton("Нет", callback_data="no"),
+            InlineKeyboardButton("Да", callback_data=CALLBACK_YES),
+            InlineKeyboardButton("Нет", callback_data=CALLBACK_NO),
         ],
-        [InlineKeyboardButton("⬅️ Назад", callback_data="prev_menu")],
+        [InlineKeyboardButton("⬅️ Назад", callback_data=CALLBACK_PREV_MENU)],
     ]
 
     markup = InlineKeyboardMarkup(keyboard)
@@ -56,10 +57,10 @@ def wants_reply(update: Update, context: CallbackContext):
     data = update.callback_query.data
     msg = update.callback_query.message
 
-    if data == "prev_menu":
+    if data == CALLBACK_PREV_MENU:
         return select_type(update, context)
 
-    if data == "yes":
+    if data == CALLBACK_YES:
         msg.edit_text("STR_FORWARD_MESSAGE")
     else:
         msg.edit_text("STR_THANKS_FOR_FEEDBACK")
@@ -130,8 +131,8 @@ def my_history(update: Update, context: CallbackContext):
 
     kb = [
         [
-            InlineKeyboardButton("⬅️", callback_data="history_scroll_left"),
-            InlineKeyboardButton("➡️️", callback_data="history_scroll_right"),
+            InlineKeyboardButton("⬅️", callback_data=CALLBACK_HISTORY_LEFT),
+            InlineKeyboardButton("➡️️", callback_data=CALLBACK_HISTORY_RIGHT),
         ]
     ]
 
