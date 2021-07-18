@@ -35,9 +35,9 @@ pipeline {
             }
 
             steps {
-                withCredentials([file(credentialsId: 'feedback_bot', variable: 'feedback_bot')]) {
+                withCredentials([file(credentialsId: 'feedback_bottttt', variable: 'feedback_bot')]) {
                     echo "${feedback_bot}"
-                    
+
                     sh "cp \$feedback_bot feedback-bot.env"
                     sh "cp \$feedback_bot feedback-bot.env"
 
