@@ -35,7 +35,7 @@ pipeline {
 
             steps {
                 withCredentials([file(credentialsId: 'feedback_bot_dev', variable: 'feedback_env')]) {
-                    sh "cp \"${feedback_env}\" \"feedback-bot-dev.env\""
+                    sh "cp \"${feedback_env}\" \"feedback-bot.env\""
 
                     echo "Deploying and Building..."
                     sh "sendNotification '#Feedback_Bot_Dev 🛠 Building New Container #${BUILD_NUMBER}'"
