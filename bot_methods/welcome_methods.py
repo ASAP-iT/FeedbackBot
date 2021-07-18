@@ -163,7 +163,7 @@ def my_feedbacks(update: Update, context: CallbackContext):
         link=create_deeplink(context.bot.username, welcome.name),
     )
 
-    if len(context.user_data["feedback_scroll_ids"]) == 0:
+    if len(context.user_data["feedback_scroll_ids"]) == 1:
         return ConversationHandler.END
 
     try:
@@ -402,7 +402,7 @@ def welcome_feedbacks(update: Update, context: CallbackContext):
             name=feedback.welcome_message.name, message=feedback.message
         )
 
-    if len(context.user_data["history_feedbacks_scroll_ids"]) == 0:
+    if len(context.user_data["history_feedbacks_scroll_ids"]) == 1:
         return ConversationHandler.END
 
     try:
