@@ -332,9 +332,17 @@ class FeedbackMethods:
 
     @staticmethod
     def delete_welcome(db: Session, welcome_id: int):
-        welcome = (
+        welcome: WelcomeMessage = (
             db.query(WelcomeMessage).filter(WelcomeMessage.id == welcome_id).first()
         )
+
+        feedbacks = (
+            db.query(WelcomeMessage)
+            .filter(FeedbackMessage.welcome_message_id == welcome.id)
+            .all()
+        )
+        for feedback in feedbacks:
+            db.delete(feedback)
 
         db.delete(welcome)
         db.commit()
