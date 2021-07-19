@@ -15,6 +15,6 @@ if url is None:
     load_dotenv("feedback-bot.env")
     url = os.environ.get("DB_URL")
 
-engine = create_engine(url)
+engine = create_engine(url, pool_size=20, max_overflow=0)
 Base = declarative_base()
 SessionLocal = sessionmaker(bind=engine)
