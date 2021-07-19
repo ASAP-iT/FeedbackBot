@@ -22,17 +22,21 @@ def create_feedback_back(update: Update, context: CallbackContext) -> int:
 
 def create_feedback(update: Update, context: CallbackContext) -> int:
     msg = update.callback_query.message
-    if not FeedbackMethods.is_admin(SessionLocal(), msg.chat_id):
+
+    db = SessionLocal()
+    if not FeedbackMethods.is_admin(db, msg.chat_id):
         return ConversationHandler.END
 
     msg.edit_reply_markup(InlineKeyboardMarkup([]))
     msg.reply_text(STR_NEW_WELCOME_NAME)
 
+    db.close()
     return CHOOSE_NAME
 
 
 def choose_name(update: Update, context: CallbackContext) -> int:
     txt = update.message.text
+    db = SessionLocal()
 
     try:
         transliterated = transliterate.translit(txt, reversed=True)
@@ -44,7 +48,7 @@ def choose_name(update: Update, context: CallbackContext) -> int:
     transliterated = transliterated.replace("\n", "_")
     context.user_data["feedback_name"] = transliterated
 
-    if FeedbackMethods.name_exists(SessionLocal(), transliterated) is True:
+    if FeedbackMethods.name_exists(db, transliterated) is True:
         update.message.reply_text(STR_WELCOME_NAME_TAKEN)
         return CHOOSE_NAME
 
@@ -56,19 +60,23 @@ def choose_name(update: Update, context: CallbackContext) -> int:
 
     update.message.reply_text(STR_NEW_WELCOME_MESSAGE, reply_markup=markup)
 
+    db.close()
     return CREATE_WELCOME
 
 
 def create_welcome(update: Update, context: CallbackContext) -> int:
     name = context.user_data["feedback_name"]
     welcome_txt = update.message.text
+    db = SessionLocal()
 
     if name is None or welcome_txt is None:
         update.message.reply_text(STR_ERROR)
+
+        db.close()
         return ConversationHandler.END
 
     welcome, url = FeedbackMethods.create_welcome(
-        SessionLocal(),
+        db,
         update.message.chat_id,
         name,
         welcome_txt,
@@ -76,6 +84,8 @@ def create_welcome(update: Update, context: CallbackContext) -> int:
     )
     if welcome is None:
         update.message.reply_text(STR_ERROR)
+
+        db.close()
         return ConversationHandler.END
 
     update.message.reply_photo(
@@ -87,19 +97,22 @@ def create_welcome(update: Update, context: CallbackContext) -> int:
         photo=open(url, "rb"),
     )
 
+    db.close()
     return ConversationHandler.END
 
 
 def my_feedbacks(update: Update, context: CallbackContext):
     msg = update.callback_query.message
     data = update.callback_query.data
+    db = SessionLocal()
 
     context.user_data["feedback_scroll_ids"] = [
-        x.id for x in FeedbackMethods.get_welcomes(SessionLocal(), msg.chat_id)
+        x.id for x in FeedbackMethods.get_welcomes(db, msg.chat_id)
     ]
 
     if len(context.user_data["feedback_scroll_ids"]) == 0:
         msg.reply_text(STR_NO_WELCOMES)
+        db.close()
         return ConversationHandler.END
 
     if context.user_data.get("current_feedback_scroll_id") is None:
@@ -125,7 +138,7 @@ def my_feedbacks(update: Update, context: CallbackContext):
 
     welcome_id = context.user_data["feedback_scroll_ids"][current_id]
 
-    welcome = FeedbackMethods.get_welcome_by_id(SessionLocal(), welcome_id)
+    welcome = FeedbackMethods.get_welcome_by_id(db, welcome_id)
 
     context.user_data["welcome_id_scroll"] = welcome.id
 
@@ -167,6 +180,7 @@ def my_feedbacks(update: Update, context: CallbackContext):
     #     return ConversationHandler.END
 
     if msg.caption == caption.strip():
+        db.close()
         return ConversationHandler.END
 
     try:
@@ -183,6 +197,7 @@ def my_feedbacks(update: Update, context: CallbackContext):
             open(welcome.code_url, "rb"), caption=caption, reply_markup=markup
         )
 
+    db.close()
     return ConversationHandler.END
 
 
@@ -259,31 +274,38 @@ def new_title(update: Update, context: CallbackContext):
     transliterated = transliterated.replace(" ", "_")
     transliterated = transliterated.replace("\n", "_")
 
+    db = SessionLocal()
     FeedbackMethods.edit_welcome_title(
-        SessionLocal(), context.user_data["current_edit_id"], transliterated
+        db, context.user_data["current_edit_id"], transliterated
     )
     update.message.reply_text(STR_WELCOME_TITLE_EDITED)
 
+    db.close()
     return ConversationHandler.END
 
 
 def new_description(update: Update, context: CallbackContext):
     new_d = update.message.text
+    db = SessionLocal()
 
     FeedbackMethods.edit_welcome_description(
-        SessionLocal(), context.user_data["current_edit_id"], new_d
+        db, context.user_data["current_edit_id"], new_d
     )
     update.message.reply_text(STR_WELCOME_DESC_EDITED)
 
+    db.close()
     return ConversationHandler.END
 
 
 def delete_welcome(update: Update, context: CallbackContext):
     msg = update.callback_query.message
+    db = SessionLocal()
 
-    FeedbackMethods.delete_welcome(SessionLocal(), context.user_data["current_edit_id"])
+    FeedbackMethods.delete_welcome(db, context.user_data["current_edit_id"])
 
     msg.edit_text(STR_WELCOME_DELETED)
+
+    db.close()
     return ConversationHandler.END
 
 
@@ -340,6 +362,7 @@ def reply_message(update: Update, context: CallbackContext):
         STR_FEEDBACK_REPLY.format(name=feedback.welcome_message.name, message=msg),
     )
 
+    db.close()
     return ConversationHandler.END
 
 
@@ -351,15 +374,18 @@ def welcome_feedbacks(update: Update, context: CallbackContext):
         edit_welcome_back(update, context)
         return ConversationHandler.END
 
+    db = SessionLocal()
     context.user_data["history_feedbacks_scroll_ids"] = [
         x.id
         for x in FeedbackMethods.get_welcome_feedbacks(
-            SessionLocal(), msg.chat_id, context.user_data["welcome_id_scroll"]
+            db, msg.chat_id, context.user_data["welcome_id_scroll"]
         )
     ]
 
     if len(context.user_data["history_feedbacks_scroll_ids"]) == 0:
         msg.reply_text(STR_NO_FEEDBACKS)
+
+        db.close()
         return ConversationHandler.END
 
     if context.user_data.get("current_history_feed_scroll_id") is None:
@@ -411,6 +437,7 @@ def welcome_feedbacks(update: Update, context: CallbackContext):
         )
 
     if msg.text == text.strip():
+        db.close()
         return ConversationHandler.END
 
     try:
@@ -422,4 +449,5 @@ def welcome_feedbacks(update: Update, context: CallbackContext):
             pass
         msg.reply_text(text, reply_markup=markup)
 
+    db.close()
     return ConversationHandler.END

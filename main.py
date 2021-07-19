@@ -43,7 +43,8 @@ import sys
 
 def start(update: Update, context: CallbackContext) -> int:
     msg = update.message
-    FeedbackMethods.create_user(SessionLocal(), update.message.from_user.id)
+    db = SessionLocal()
+    FeedbackMethods.create_user(db, update.message.from_user.id)
     context.user_data["user_id"] = msg.from_user.id
 
     if context.args is not None:
@@ -51,15 +52,19 @@ def start(update: Update, context: CallbackContext) -> int:
             context.user_data["welcome_name"] = context.args[0]
             welcome_name = context.user_data["welcome_name"]
 
-            welcome = FeedbackMethods.get_welcome(SessionLocal(), welcome_name)
+            welcome = FeedbackMethods.get_welcome(db, welcome_name)
 
             if welcome is None:
-                if FeedbackMethods.delete_token(SessionLocal(), welcome_name) is None:
+                if FeedbackMethods.delete_token(db, welcome_name) is None:
                     msg.reply_markdown_v2(STR_INVALID_LINK)
+
+                    db.close()
                     return ConversationHandler.END
                 else:
-                    FeedbackMethods.create_admin(SessionLocal(), msg.chat_id)
+                    FeedbackMethods.create_admin(db, msg.chat_id)
                     msg.reply_markdown_v2(STR_ADMIN_WELCOME)
+
+                    db.close()
                     return ConversationHandler.END
 
             keyboard = [
@@ -79,6 +84,7 @@ def start(update: Update, context: CallbackContext) -> int:
                 reply_markup=markup,
             )
 
+            db.close()
             return SELECT_TYPE
 
     kb = [
@@ -88,7 +94,7 @@ def start(update: Update, context: CallbackContext) -> int:
         ],
     ]
 
-    if FeedbackMethods.is_admin(SessionLocal(), update.message.chat_id):
+    if FeedbackMethods.is_admin(db, update.message.chat_id):
         kb.append(
             [
                 InlineKeyboardButton(
@@ -115,7 +121,8 @@ def help(update: Update, context: CallbackContext) -> int:
     else:
         msg = update.message
 
-    is_admin = FeedbackMethods.is_admin(SessionLocal(), msg.chat.id)
+    db = SessionLocal()
+    is_admin = FeedbackMethods.is_admin(db, msg.chat.id)
     if is_admin:
         new_text = STR_ADMIN_HELP
     else:
@@ -126,6 +133,8 @@ def help(update: Update, context: CallbackContext) -> int:
         )
     except:
         msg.reply_text(new_text, parse_mode="HTML")
+
+        db.close()
     return ConversationHandler.END
 
 

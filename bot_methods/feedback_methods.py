@@ -67,8 +67,10 @@ def wants_reply(update: Update, context: CallbackContext):
     else:
         msg.edit_text(STR_THANKS_FOR_FEEDBACK)
 
+    db = SessionLocal()
+
     fb_msg = FeedbackMethods.create_feedback(
-        SessionLocal(),
+        db,
         welcome_id=context.user_data["welcome_id"],
         from_user_id=context.user_data["user_id"],
         message=context.user_data["user_msg"],
@@ -100,19 +102,22 @@ def wants_reply(update: Update, context: CallbackContext):
         reply_markup=markup,
     )
 
+    db.close()
     return ConversationHandler.END
 
 
 def my_history(update: Update, context: CallbackContext):
     msg = update.callback_query.message
     data = update.callback_query.data
+    db = SessionLocal()
 
     context.user_data["history_scroll_ids"] = [
-        x.id for x in FeedbackMethods.get_feedbacks(SessionLocal(), msg.chat_id)
+        x.id for x in FeedbackMethods.get_feedbacks(db, msg.chat_id)
     ]
 
     if len(context.user_data["history_scroll_ids"]) == 0:
         msg.reply_text(STR_NO_FEEDBACKS)
+        db.close()
         return ConversationHandler.END
 
     if context.user_data.get("current_history_scroll_id") is None:
@@ -138,7 +143,7 @@ def my_history(update: Update, context: CallbackContext):
 
     feedback_id = context.user_data["history_scroll_ids"][current_id]
 
-    feedback = FeedbackMethods.get_feedback(SessionLocal(), feedback_id)
+    feedback = FeedbackMethods.get_feedback(db, feedback_id)
 
     kb = [
         [
@@ -159,6 +164,7 @@ def my_history(update: Update, context: CallbackContext):
         )
 
     if msg.text == text.strip():
+        db.close()
         return ConversationHandler.END
 
     try:
@@ -170,4 +176,5 @@ def my_history(update: Update, context: CallbackContext):
             pass
         msg.reply_text(text, reply_markup=markup)
 
+    db.close()
     return ConversationHandler.END
