@@ -149,9 +149,14 @@ def my_history(update: Update, context: CallbackContext):
 
     markup = InlineKeyboardMarkup(kb)
 
-    text = STR_HISTORY_ITEM.format(
-        name=feedback.welcome_message.name, message=feedback.message
-    )
+    if feedback.response is None:
+        text = STR_HISTORY_ITEM.format(
+            name=feedback.welcome_message.name, message=feedback.message
+        )
+    else:
+        text = STR_HISTORY_FEEDBACK_ITEM.format(
+            name=feedback.welcome_message.name, message=feedback.message, response=feedback.response
+        )
 
     if msg.text == text.strip():
         return ConversationHandler.END
