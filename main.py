@@ -133,14 +133,12 @@ def help(update: Update, context: CallbackContext) -> int:
     else:
         new_text = STR_USER_HELP
 
-    markup = InlineKeyboardMarkup([
-        [InlineKeyboardButton(STR_TO_MENU, callback_data=CMD_START)]
-    ])
+    markup = InlineKeyboardMarkup(
+        [[InlineKeyboardButton(STR_TO_MENU, callback_data=CMD_START)]]
+    )
 
     try:
-        msg.edit_text(
-            new_text, reply_markup=markup, parse_mode="HTML"
-        )
+        msg.edit_text(new_text, reply_markup=markup, parse_mode="HTML")
     except:
         msg.reply_text(new_text, parse_mode="HTML", reply_markup=markup)
 
@@ -211,7 +209,10 @@ def main():
     dp.add_handler(CommandHandler(CMD_ADMIN, grant_admin))
 
     feedback = ConversationHandler(
-        entry_points=[CommandHandler(CMD_START, start), CallbackQueryHandler(start, pattern=fr"{CMD_START}")],
+        entry_points=[
+            CommandHandler(CMD_START, start),
+            CallbackQueryHandler(start, pattern=fr"{CMD_START}"),
+        ],
         states={
             SELECT_TYPE: [
                 CallbackQueryHandler(select_type, pattern=fr"{CALLBACK_SELECT_TYPE}")
