@@ -88,6 +88,9 @@ def create_welcome(update: Update, context: CallbackContext) -> int:
         db.close()
         return ConversationHandler.END
 
+    markup = InlineKeyboardMarkup(
+        [[InlineKeyboardButton(STR_TO_MENU, callback_data=CMD_START)]]
+    )
     update.message.reply_photo(
         caption=STR_WELCOME_OVERVIEW.format(
             name=name,
@@ -95,6 +98,7 @@ def create_welcome(update: Update, context: CallbackContext) -> int:
             link=create_deeplink(context.bot.username, name),
         ),
         photo=open(url, "rb"),
+        reply_markup=markup,
     )
 
     db.close()
@@ -156,11 +160,12 @@ def my_feedbacks(update: Update, context: CallbackContext):
             InlineKeyboardButton(
                 STR_WELCOME_SHOW_FEEDBACKS, callback_data=f"his_feedbacks"
             ),
-        ],
-        [
             InlineKeyboardButton(
                 STR_WELCOME_DELETE, callback_data=f"edit_welcome_delete-{welcome_id}"
             ),
+        ],
+        [
+            InlineKeyboardButton(STR_TO_MENU, callback_data=CMD_START),
         ],
     ]
 
@@ -306,6 +311,11 @@ def delete_welcome(update: Update, context: CallbackContext):
     msg.edit_text(STR_WELCOME_DELETED)
 
     db.close()
+
+    from main import start
+
+    start(update, context)
+
     return ConversationHandler.END
 
 

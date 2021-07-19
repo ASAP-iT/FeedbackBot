@@ -107,3 +107,4 @@ STR_HISTORY_FEEDBACK_ITEM = """
 Сообщение: {message}
 Ответ: {response}
 """
+STR_TO_MENU = "В меню"

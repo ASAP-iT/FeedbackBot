@@ -43,8 +43,13 @@ import sys
 
 def start(update: Update, context: CallbackContext) -> int:
     msg = update.message
+
+    if msg is None:
+        msg = update.callback_query.message
+        msg.delete()
+
     db = SessionLocal()
-    FeedbackMethods.create_user(db, update.message.from_user.id)
+    FeedbackMethods.create_user(db, msg.from_user.id)
     context.user_data["user_id"] = msg.from_user.id
 
     if context.args is not None:
@@ -79,7 +84,7 @@ def start(update: Update, context: CallbackContext) -> int:
             context.user_data["welcome_id"] = welcome.id
             context.user_data["welcome_name"] = welcome.name
 
-            update.message.reply_text(
+            msg.reply_text(
                 STR_WELCOME_TEXT.format(name=welcome.name, message=welcome.message),
                 reply_markup=markup,
             )
@@ -94,7 +99,7 @@ def start(update: Update, context: CallbackContext) -> int:
         ],
     ]
 
-    if FeedbackMethods.is_admin(db, update.message.chat_id):
+    if FeedbackMethods.is_admin(db, msg.chat_id):
         kb.append(
             [
                 InlineKeyboardButton(
@@ -127,12 +132,15 @@ def help(update: Update, context: CallbackContext) -> int:
         new_text = STR_ADMIN_HELP
     else:
         new_text = STR_USER_HELP
+
+    markup = InlineKeyboardMarkup(
+        [[InlineKeyboardButton(STR_TO_MENU, callback_data=CMD_START)]]
+    )
+
     try:
-        msg.edit_text(
-            new_text, reply_markup=InlineKeyboardMarkup([]), parse_mode="HTML"
-        )
+        msg.edit_text(new_text, reply_markup=markup, parse_mode="HTML")
     except:
-        msg.reply_text(new_text, parse_mode="HTML")
+        msg.reply_text(new_text, parse_mode="HTML", reply_markup=markup)
 
         db.close()
     return ConversationHandler.END
@@ -201,7 +209,10 @@ def main():
     dp.add_handler(CommandHandler(CMD_ADMIN, grant_admin))
 
     feedback = ConversationHandler(
-        entry_points=[CommandHandler(CMD_START, start)],
+        entry_points=[
+            CommandHandler(CMD_START, start),
+            CallbackQueryHandler(start, pattern=fr"{CMD_START}"),
+        ],
         states={
             SELECT_TYPE: [
                 CallbackQueryHandler(select_type, pattern=fr"{CALLBACK_SELECT_TYPE}")
