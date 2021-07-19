@@ -326,9 +326,14 @@ def reply_message(update: Update, context: CallbackContext):
         message_id=context.user_data["current_reply_msg_id"],
     )
 
+    db = SessionLocal()
+
     feedback = FeedbackMethods.get_feedback(
-        SessionLocal(), context.user_data["current_reply_feedback_id"]
+        db, context.user_data["current_reply_feedback_id"]
     )
+
+    feedback.response = msg
+    db.commit()
 
     update.message.bot.send_message(
         feedback.from_user_id,
