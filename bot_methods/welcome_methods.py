@@ -402,7 +402,7 @@ def welcome_feedbacks(update: Update, context: CallbackContext):
             context.user_data["current_history_feed_scroll_id"] = 0
         if context.user_data["current_history_feed_scroll_id"] < 0:
             context.user_data["current_history_feed_scroll_id"] = (
-                    len(context.user_data["history_scroll_ids"]) - 1
+                len(context.user_data["history_scroll_ids"]) - 1
             )
 
     current_id = context.user_data["current_history_feed_scroll_id"]

@@ -160,7 +160,9 @@ def my_history(update: Update, context: CallbackContext):
         )
     else:
         text = STR_HISTORY_FEEDBACK_ITEM.format(
-            name=feedback.welcome_message.name, message=feedback.message, response=feedback.response
+            name=feedback.welcome_message.name,
+            message=feedback.message,
+            response=feedback.response,
         )
 
     if msg.text == text.strip():

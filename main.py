@@ -178,6 +178,7 @@ def error_shit(update: Update, context: CallbackContext):
 # noinspection PyTypeChecker
 def main():
     import os
+
     os.system("mkdir codes")
 
     load_dotenv("feedback-bot-dev.env")
@@ -197,9 +198,7 @@ def main():
 
     dp = updater.dispatcher
 
-    dp.add_handler(
-        CommandHandler(CMD_ADMIN, grant_admin)
-    )
+    dp.add_handler(CommandHandler(CMD_ADMIN, grant_admin))
 
     feedback = ConversationHandler(
         entry_points=[CommandHandler(CMD_START, start)],
