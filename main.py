@@ -99,9 +99,9 @@ def start(update: Update, context: CallbackContext) -> int:
                 ),
             ]
         )
-        kb.append(
-            [InlineKeyboardButton(STR_SHARE_ADMIN, callback_data="start_grand_admin")]
-        )
+        # kb.append(
+        #     [InlineKeyboardButton(STR_SHARE_ADMIN, callback_data="start_grand_admin")]
+        # )
     markup = InlineKeyboardMarkup(kb)
 
     msg.reply_text(STR_START_MSG, reply_markup=markup)
@@ -143,11 +143,12 @@ def send_to_admins(bot, txt: str, parse_mode=None, **kwargs):
 
 
 def grant_admin(update: Update, context: CallbackContext):
-    msg = update.callback_query.message
+    msg = update.message
 
-    is_admin = FeedbackMethods.is_admin(SessionLocal(), msg.chat_id)
+    db = SessionLocal()
+    is_admin = FeedbackMethods.is_admin(db, msg.chat_id)
     if is_admin:
-        token = FeedbackMethods.create_token(SessionLocal())
+        token = FeedbackMethods.create_token(db)
         msg.reply_text(
             STR_YOUR_TOKEN.format(token=create_deeplink(context.bot.username, token))
         )
@@ -181,7 +182,7 @@ def main():
     dp = updater.dispatcher
 
     dp.add_handler(
-        CallbackQueryHandler(grant_admin, pattern=fr"{CALLBACK_GRANT_ADMIN}")
+        CommandHandler(CMD_ADMIN, grant_admin)
     )
 
     feedback = ConversationHandler(

@@ -4,6 +4,7 @@
 CMD_START = "start"
 CMD_CANCEL = "cancel"
 CMD_HELP = "help"
+CMD_ADMIN = "share_admin"
 
 CALLBACK_HELP = "start_help"
 CALLBACK_GRANT_ADMIN = "start_grand_admin"

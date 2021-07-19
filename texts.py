@@ -2,10 +2,16 @@
 # texts.py
 from commands import *
 
-STR_ADMIN_HELP = f"""Чтобы создать опрос используйте кнопку в меню /{CMD_START}\n\n
-Если у вас есть вопросы или предложения по работе бота, вы можете их отправить по \
-<a href="https://t.me/asap_feedback_bot?start=asapteam_feedback_bot">ссылке</a> \
-или написать в личные сообщения @mosenzova_iui\n\nСделано командой <a href="https://t.me/asapdvfu">ASAP❤️ </a>"""
+STR_ADMIN_HELP = f"""
+Чтобы создать опрос используйте кнопку в меню /{CMD_START}
+Чтобы поделиться админкой используйте /{CMD_ADMIN}
+
+Если у вас есть вопросы или предложения по работе бота, вы можете их отправить по
+<a href="https://t.me/asap_feedback_bot?start=asapteam_feedback_bot">ссылке</a>
+или написать в личные сообщения @mosenzova_iui
+
+Сделано командой <a href="https://t.me/asapdvfu">ASAP❤️ </a>
+"""
 
 STR_USER_HELP = (
     "Привет! Для того, чтобы оставить отзыв или задать вопрос, необходимо отсканировать QR-код."
