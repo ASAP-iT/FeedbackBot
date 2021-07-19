@@ -145,11 +145,16 @@ def my_history(update: Update, context: CallbackContext):
 
     feedback = FeedbackMethods.get_feedback(db, feedback_id)
 
+    length = len(context.user_data["history_scroll_ids"])
+    out_of = f"{current_id + 1} / {length}"
+
     kb = [
         [
             InlineKeyboardButton(STR_ARROW_LEFT, callback_data=CALLBACK_HISTORY_LEFT),
+            InlineKeyboardButton(out_of, callback_data="empty"),
             InlineKeyboardButton(STR_ARROW_RIGHT, callback_data=CALLBACK_HISTORY_RIGHT),
-        ]
+        ],
+        [InlineKeyboardButton(STR_TO_MENU, callback_data=CMD_START)],
     ]
 
     markup = InlineKeyboardMarkup(kb)

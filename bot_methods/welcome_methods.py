@@ -146,22 +146,25 @@ def my_feedbacks(update: Update, context: CallbackContext):
 
     context.user_data["welcome_id_scroll"] = welcome.id
 
+    length = len(context.user_data["feedback_scroll_ids"])
+    out_of = f"{current_id+1} / {length}"
+
     kb = [
         [
             InlineKeyboardButton(STR_ARROW_LEFT, callback_data=CALLBACK_FEEDBACK_LEFT),
-            InlineKeyboardButton(
-                STR_WELCOME_EDIT, callback_data=f"welcome_edit-{welcome_id}"
-            ),
+            InlineKeyboardButton(out_of, callback_data="empty"),
             InlineKeyboardButton(
                 STR_ARROW_RIGHT, callback_data=CALLBACK_FEEDBACK_RIGHT
             ),
         ],
         [
             InlineKeyboardButton(
-                STR_WELCOME_SHOW_FEEDBACKS, callback_data=f"his_feedbacks"
+                STR_WELCOME_EDIT, callback_data=f"welcome_edit-{welcome_id}"
             ),
+        ],
+        [
             InlineKeyboardButton(
-                STR_WELCOME_DELETE, callback_data=f"edit_welcome_delete-{welcome_id}"
+                STR_WELCOME_SHOW_FEEDBACKS, callback_data=f"his_feedbacks"
             ),
         ],
         [
@@ -224,6 +227,11 @@ def welcome_edit(update: Update, context: CallbackContext):
                 STR_WELCOME_EDIT_DESCRIPTION,
                 callback_data=f"edit_welcome_description-{welcome_id}",
             )
+        ],
+        [
+            InlineKeyboardButton(
+                STR_WELCOME_DELETE, callback_data=f"edit_welcome_delete-{welcome_id}"
+            ),
         ],
         [InlineKeyboardButton(STR_ARROW_LEFT, callback_data=CALLBACK_WELCOME_BACK)],
     ]
@@ -412,7 +420,7 @@ def welcome_feedbacks(update: Update, context: CallbackContext):
             context.user_data["current_history_feed_scroll_id"] = 0
         if context.user_data["current_history_feed_scroll_id"] < 0:
             context.user_data["current_history_feed_scroll_id"] = (
-                len(context.user_data["history_scroll_ids"]) - 1
+                len(context.user_data["history_feedbacks_scroll_ids"]) - 1
             )
 
     current_id = context.user_data["current_history_feed_scroll_id"]
@@ -421,11 +429,15 @@ def welcome_feedbacks(update: Update, context: CallbackContext):
 
     feedback = FeedbackMethods.get_feedback(SessionLocal(), feedback_id)
 
+    length = len(context.user_data["history_feedbacks_scroll_ids"])
+    out_of = f"{current_id + 1} / {length}"
+
     kb = [
         [
             InlineKeyboardButton(
                 STR_ARROW_LEFT, callback_data=CALLBACK_HISTORY_FEED_LEFT
             ),
+            InlineKeyboardButton(out_of, callback_data="empty"),
             InlineKeyboardButton(
                 STR_ARROW_RIGHT, callback_data=CALLBACK_HISTORY_FEED_RIGHT
             ),
