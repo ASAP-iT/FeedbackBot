@@ -164,7 +164,10 @@ def grant_admin(update: Update, context: CallbackContext):
 
 
 def error_shit(update: Update, context: CallbackContext):
-    admins = context.bot.get_chat_administrators(update.message.chat_id)
+    try:
+        admins = context.bot.get_chat_administrators(update.message.chat_id)
+    except:
+        return help(update, context)
     if admins is None:
         return help(update, context)
     if len(admins) == 0:
