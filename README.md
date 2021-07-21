@@ -10,4 +10,7 @@
 
 ### Preview
 
-![4](https://github.com/asap-it/FeedbackBot/raw/main/imgs/1.PNG)
+![1](https://github.com/asap-it/FeedbackBot/raw/main/imgs/1.PNG)
+![2](https://github.com/asap-it/FeedbackBot/raw/main/imgs/2.PNG)
+![3](https://github.com/asap-it/FeedbackBot/raw/main/imgs/3.PNG)
+![4](https://github.com/asap-it/FeedbackBot/raw/main/imgs/4.PNG)
