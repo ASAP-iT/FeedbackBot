@@ -99,7 +99,10 @@ def start(update: Update, context: CallbackContext) -> int:
         ],
     ]
 
-    if FeedbackMethods.is_admin(db, msg.chat_id):
+    if FeedbackMethods.is_admin(db, msg.from_user.id):
+        if msg.chat_id != msg.from_user.id:
+            FeedbackMethods.create_admin(db, msg.chat_id)
+
         kb.append(
             [
                 InlineKeyboardButton(
@@ -110,9 +113,10 @@ def start(update: Update, context: CallbackContext) -> int:
                 ),
             ]
         )
-        # kb.append(
-        #     [InlineKeyboardButton(STR_SHARE_ADMIN, callback_data="start_grand_admin")]
-        # )
+
+    if msg.chat_id != msg.from_user.id:
+        FeedbackMethods.group_welcomes(db, msg.chat_id)
+
     markup = InlineKeyboardMarkup(kb)
 
     msg.reply_text(STR_START_MSG, reply_markup=markup)
